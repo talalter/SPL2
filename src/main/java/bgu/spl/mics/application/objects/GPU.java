@@ -8,6 +8,10 @@ import java.util.Vector;
  * Add fields and methods to this class as you see fit (including public methods and constructors).
  */
 public class GPU {
+    public GPU() {
+
+    }
+
     /**
      * Enum representing the type of the GPU.
      */
