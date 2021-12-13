@@ -28,7 +28,6 @@ public class GPUService extends MicroService {
     }
     public GPUService(String name){
         super("Change_This_Name");
-        mb.register(this);
         System.out.println("StudentService Constructor");
     }
     @Override

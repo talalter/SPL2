@@ -4,7 +4,10 @@ import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.PublishResultsEvent;
 import bgu.spl.mics.application.messages.TestModelEvent;
 import bgu.spl.mics.application.messages.TrainModelEvent;
+import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.objects.Student;
+
+import java.util.Vector;
 
 /**
  * Student is responsible for sending the {@link TrainModelEvent},
@@ -27,11 +30,12 @@ public class StudentService extends MicroService {
 
     int a = 0;
     Student student;
-
-    TrainModelEvent t1 = new TrainModelEvent();
+    Vector<Model> models = new Vector<Model>();
+    TrainModelEvent t1 = new TrainModelEvent(new Model());
     Class c1 = t1.getClass();
     Class trainModelEventClass = TrainModelEvent.class;
     Class TestModelEventClass = TestModelEvent.class;
+    private Model.Status Trained;
 
     public StudentService(String name, Student student) {
         super("Change_This_Name");
@@ -40,6 +44,14 @@ public class StudentService extends MicroService {
 
     @Override
     protected void initialize() {
-        sendEvent(t1);
+        subscribeEvent(PublishResultsEvent.class, a -> System.out.println("LALALA"));
+        for (Model m : student.getModels()){
+            sendEvent(new TrainModelEvent(m));
+        }
+        /*for (Model m: student.getModels()){
+            if(m.getStatus()==Trained){
+                sendEvent(new TestModelEvent(m))
+            }
+        }*/
     }
 }
