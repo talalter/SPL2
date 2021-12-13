@@ -8,6 +8,10 @@ import java.util.Vector;
  * Add fields and methods to this class as you see fit (including public methods and constructors).
  */
 public class GPU {
+    public GPU() {
+
+    }
+
     /**
      * Enum representing the type of the GPU.
      */
@@ -55,10 +59,10 @@ public class GPU {
          *  */
     }
 
-    public void ReciveMessageToTrainModel(Model m){
-        int batches = m.getData().getSize()/1000;
+    public void ReciveMessageToTrainModel(){
+        int batches = this.model.getData().getSize()/1000;
         for(int i=0;i<batches;i++){
-            DataBatch db=new DataBatch(m.getData(),i*1000,this);
+            DataBatch db=new DataBatch(this.model.getData(),i*1000,this);
             this.unProcessedDataBatchVector.add(db);
         }
         sendBatches(unProcessedDataBatchVector);

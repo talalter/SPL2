@@ -3,7 +3,7 @@ package bgu.spl.mics;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
-
+//.
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
  * Write your implementation here!
@@ -65,7 +65,7 @@ public class MessageBusImpl implements MessageBus {
 		for (MicroService m : message_service.get(b.getClass())) {
 			service_message.get(m).add(b);
 		}
-		notifyAll();
+		//notifyAll();
 	}
 
 
@@ -84,7 +84,7 @@ public class MessageBusImpl implements MessageBus {
 			service_message.get(microservice).add(e);
 			Future<T> f = new Future<>();
 			message_future.put(e, f);
-			notifyAll();
+			//notifyAll();
 			return f;
 		}
 		return null;
@@ -108,10 +108,9 @@ public class MessageBusImpl implements MessageBus {
 	}
 
 	@Override
-	public Message awaitMessage(MicroService m) throws InterruptedException {
-	//	System.out.println(service_message.get(m).isEmpty());
-	//	while(service_message.get(m).isEmpty())
-	//		wait();
+	public synchronized Message awaitMessage(MicroService m) throws InterruptedException {
+		while(service_message.get(m).isEmpty())
+			wait();
 		Vector<Message> tempService = service_message.get(m);
 		Message output=tempService.firstElement();
 		service_message.get(m).remove(output);

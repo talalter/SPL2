@@ -1,7 +1,10 @@
 package bgu.spl.mics;
 
+import bgu.spl.mics.application.messages.TrainModelEvent;
 import bgu.spl.mics.application.objects.Cluster;
 import bgu.spl.mics.application.objects.Data;
+import bgu.spl.mics.application.objects.GPU;
+import bgu.spl.mics.application.objects.Model;
 
 import java.util.HashMap;
 
@@ -27,7 +30,7 @@ public abstract class MicroService implements Runnable {
 
     private boolean terminated = false;
     private String name;
-    protected MessageBus mb;
+    private MessageBus mb;
     protected Cluster cluster;
     protected HashMap<Class<? extends Message>,Callback> reactions;
     private HashMap<Event,Future> event;
@@ -70,12 +73,14 @@ public abstract class MicroService implements Runnable {
     public MicroService() {
 
     }
-
+//
     protected final <T, E extends Event<T>> void subscribeEvent(Class<E> type, Callback<E> callback) {
         mb.subscribeEvent(type,this);
         reactions.put(type,callback);
     }
-
+    private void register(MicroService m){
+        mb.register(m);
+    }
     /**
      * Subscribes to broadcast message of type {@code type} with the callbackֺ
      * {@code callback}. This meֺֺֺans two things:
@@ -113,7 +118,7 @@ public abstract class MicroService implements Runnable {
      *         			micro-service processing this event.
      * 	       			null in case no micro-service has subscribed to {@code e.getClass()}.
      */
-    protected final <T> Future<T> sendEvent(Event<T> e) {
+    protected  <T> Future<T> sendEvent(Event<T> e) {
         Future<T> future = mb.sendEvent(e);
         event.put(e,future);
         return future;
@@ -171,22 +176,27 @@ public abstract class MicroService implements Runnable {
      */
     @Override
     public final void run() {
+
+        //All the callbacks that belong to the micro-service must be executed inside its own message-loop.
+        //Registration, Initialization, and Unregistration of the Micro-Service must be executed inside its run method.
+
+        mb.register(this); //When the Micro-Service starts executing the run method, it registers itself with the
+        //Message-Bus and then calls the abstract initialize method
         initialize();
-        System.out.println(Thread.currentThread().getId());
         while (!terminated) {
             Message message = null;
             try {
                 message = mb.awaitMessage(this);
+                reactions.get(message.getClass()).call(message);
+                //callback.call(new TrainModelEvent());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            Callback callback = reactions.get(message.getClass());
-            try {
-                callback.call(message);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
+        mb.unregister(this);
+
+
+
     }
 
 }

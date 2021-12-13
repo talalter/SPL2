@@ -1,5 +1,7 @@
 package bgu.spl.mics.application.objects;
 
+import java.util.Vector;
+
 /**
  * Passive object representing single student.
  * Add fields and methods to this class as you see fit (including public methods and constructors).
@@ -16,14 +18,21 @@ public class Student {
     private Degree status;
     private int publications;
     private int papersRead;
+    private Vector<Model> models;
 
-    public Student(String name, String department, Degree status){
+    public Vector<Model> getModels() {
+        return models;
+    }
+
+    public Student(String name, String department, Degree status, Vector<Model> models){
         this.name=name;
         this.department = department;
         this.status = status;
         this.publications = 0;
         this.papersRead = 0;
+        this.models=models;
     }
+    public
     Student(){}
 
 }

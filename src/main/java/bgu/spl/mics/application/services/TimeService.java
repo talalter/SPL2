@@ -1,6 +1,12 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.Broadcast;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.TickBroadcast;
+
+import java.sql.Time;
+import java.time.Clock;
+import java.util.Timer;
 
 /**
  * TimeService is the global system timer There is only one instance of this micro-service.
@@ -12,16 +18,32 @@ import bgu.spl.mics.MicroService;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class TimeService extends MicroService{
-
-	public TimeService() {
-		super("Change_This_Name");
-		// TODO Implement this
+	Clock clock;
+	int timeTicks;
+	long duration;
+	public TimeService(int timeTicks) {
+		super("Timer");
+		this.timeTicks = timeTicks;
+		System.out.println("Time Service Constructor");
+		this.duration = 500000000;
 	}
-
 	@Override
 	protected void initialize() {
-		// TODO Implement this
-		
+
+		clock = Clock.systemDefaultZone();
+		long milliSeconds = clock.millis();
+		System.out.println(milliSeconds+ " " + clock.millis());
+		while(clock.millis()<duration+milliSeconds) {
+			System.out.println(clock.millis());
+			sendBroadcast(new TickBroadcast());
+			try {
+
+				Thread.currentThread().sleep(timeTicks);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 }
