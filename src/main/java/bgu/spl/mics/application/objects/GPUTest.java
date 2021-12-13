@@ -24,7 +24,7 @@ public class GPUTest {
         Model model = new Model ("check", data, student);
         Data data = new Data (Data.Type.Images,4000);
         Vector<DataBatch>  dbVec = new Vector<DataBatch>();
-        Student student = new Student("name","departmant", Student.Degree.PhD);
+        //Student student = new Student("name","departmant", Student.Degree.PhD);
     }
 
     @After
@@ -39,7 +39,7 @@ public class GPUTest {
     public void testReciveMessageToTrainModel() {
 
         int size = gpu.getUnProcessedDataBatchVector().size();
-        gpu.ReciveMessageToTrainModel(model);
+        gpu.ReciveMessageToTrainModel();
         int size_after=gpu.getUnProcessedDataBatchVector().size();
         assertTrue(size+4==size_after);
     }

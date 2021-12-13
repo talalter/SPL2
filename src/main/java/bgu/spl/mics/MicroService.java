@@ -30,7 +30,7 @@ public abstract class MicroService implements Runnable {
 
     private boolean terminated = false;
     private String name;
-    protected MessageBus mb;
+    private MessageBus mb;
     protected Cluster cluster;
     protected HashMap<Class<? extends Message>,Callback> reactions;
     private HashMap<Event,Future> event;
@@ -78,7 +78,9 @@ public abstract class MicroService implements Runnable {
         mb.subscribeEvent(type,this);
         reactions.put(type,callback);
     }
-
+    private void register(MicroService m){
+        mb.register(m);
+    }
     /**
      * Subscribes to broadcast message of type {@code type} with the callbackֺ
      * {@code callback}. This meֺֺֺans two things:
@@ -116,7 +118,7 @@ public abstract class MicroService implements Runnable {
      *         			micro-service processing this event.
      * 	       			null in case no micro-service has subscribed to {@code e.getClass()}.
      */
-    protected final <T> Future<T> sendEvent(Event<T> e) {
+    protected  <T> Future<T> sendEvent(Event<T> e) {
         Future<T> future = mb.sendEvent(e);
         event.put(e,future);
         return future;
@@ -187,11 +189,14 @@ public abstract class MicroService implements Runnable {
                 message = mb.awaitMessage(this);
                 reactions.get(message.getClass()).call(message);
                 //callback.call(new TrainModelEvent());
-                //mb.unregister(this);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
+        mb.unregister(this);
+
+
+
     }
 
 }
