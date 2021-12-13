@@ -10,6 +10,7 @@ import bgu.spl.mics.MicroService;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class CPUService extends MicroService {
+
     public CPUService(String name) {
         super("Change_This_Name");
         // TODO Implement this
