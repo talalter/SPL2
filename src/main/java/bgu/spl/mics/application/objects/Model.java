@@ -43,6 +43,6 @@ public class Model {
         this.status = Status.PreTrained;
         this.result=Result.None;
     }
-    Model(){}
+    public Model(){}
 
 }

@@ -4,6 +4,8 @@ import bgu.spl.mics.Future;
 import bgu.spl.mics.application.objects.*;
 import bgu.spl.mics.application.services.StudentService;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /** This is the Main class of Compute Resources Management System application. You should parse the input file,
  * create the different instances of the objects, and run the system.
  * In the end, you should output a text file.
@@ -13,6 +15,7 @@ public class CRMSRunner {
     private static Data.Type Images;
 
     public static void main(String[] args) {
+
         Cluster c = Cluster.getInstance();
         GPU g1 = new GPU(c);
         GPU g2 = new GPU(c);
@@ -27,6 +30,7 @@ public class CRMSRunner {
         Future<Model> f = new Future();
         Model m = new Model("YOLO10",data,student);
         StudentService studentService = new StudentService("check", student);
+
         Thread studentThread =  new Thread(studentService);
         studentThread.start();
         try {
@@ -34,7 +38,6 @@ public class CRMSRunner {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println(f.isDone());
 
     }
 }
