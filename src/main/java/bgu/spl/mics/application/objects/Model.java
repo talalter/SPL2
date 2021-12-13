@@ -9,12 +9,17 @@ package bgu.spl.mics.application.objects;
 public class Model {
 
     enum Status {PreTrained,Training, Trained, Tested}
-    enum Result {None,Good,Bad}
+    public enum Result {None,Good,Bad}
     private String name;
     private Data data;
     Student student;
     Status status;
     Result result;
+    public void setResult(Result result) {
+        this.result = result;
+    }
+
+
 
     public String getName() {
         return name;
@@ -45,4 +50,7 @@ public class Model {
     }
     public Model(){}
 
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 }

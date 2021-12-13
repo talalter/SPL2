@@ -1,13 +1,9 @@
 package bgu.spl.mics.application.services;
 
-import bgu.spl.mics.Callback;
-import bgu.spl.mics.Future;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.PublishResultsEvent;
 import bgu.spl.mics.application.messages.TestModelEvent;
 import bgu.spl.mics.application.messages.TrainModelEvent;
-import bgu.spl.mics.application.objects.GPU;
-import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.objects.Student;
 
 /**
@@ -29,19 +25,15 @@ public class StudentService extends MicroService {
 
 
 
+    int a = 0;
     Student student;
 
-    TrainModelEvent t1 = new TrainModelEvent();
-    Class c1 = t1.getClass();
-
     public StudentService(String name, Student student) {
-        super("Change_This_Name");
+        super(name);
         this.student = student;
     }
 
     @Override
     protected void initialize() {
-        subscribeEvent(c1, (TrainModelEvent g)->System.out.println("123"));
-        sendEvent(t1);
     }
 }
