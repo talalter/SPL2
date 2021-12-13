@@ -28,18 +28,12 @@ public class StudentService extends MicroService {
     int a = 0;
     Student student;
 
-    TrainModelEvent t1 = new TrainModelEvent();
-    Class c1 = t1.getClass();
-    Class trainModelEventClass = TrainModelEvent.class;
-    Class TestModelEventClass = TestModelEvent.class;
-
     public StudentService(String name, Student student) {
-        super("Change_This_Name");
+        super(name);
         this.student = student;
     }
 
     @Override
     protected void initialize() {
-        sendEvent(t1);
     }
 }

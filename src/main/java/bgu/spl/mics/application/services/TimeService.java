@@ -18,19 +18,14 @@ import java.util.Timer;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class TimeService extends MicroService{
-	Timer timer;
 	Clock clock;
 	int timeTicks;
 	long duration;
 	public TimeService(int timeTicks) {
 		super("Timer");
 		this.timeTicks = timeTicks;
-		timer = new Timer();
 		System.out.println("Time Service Constructor");
 		this.duration = 500000000;
-	}
-	public Timer getTimer(){
-		return this.timer;
 	}
 	@Override
 	protected void initialize() {
@@ -43,12 +38,11 @@ public class TimeService extends MicroService{
 			sendBroadcast(new TickBroadcast());
 			try {
 
-				Thread.currentThread().sleep(3000);
+				Thread.currentThread().sleep(timeTicks);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-		terminate();
 
 	}
 
