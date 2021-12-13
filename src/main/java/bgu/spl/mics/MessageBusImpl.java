@@ -65,7 +65,7 @@ public class MessageBusImpl implements MessageBus {
 		for (MicroService m : message_service.get(b.getClass())) {
 			service_message.get(m).add(b);
 		}
-		notifyAll();
+		//notifyAll();
 	}
 
 

@@ -185,8 +185,8 @@ public abstract class MicroService implements Runnable {
             Message message = null;
             try {
                 message = mb.awaitMessage(this);
-                Callback callback = reactions.get(message.getClass());
-                callback.call(new TrainModelEvent());
+                reactions.get(message.getClass()).call(message);
+                //callback.call(new TrainModelEvent());
                 //mb.unregister(this);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

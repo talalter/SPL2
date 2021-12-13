@@ -2,7 +2,9 @@ package bgu.spl.mics.application;
 
 import bgu.spl.mics.Future;
 import bgu.spl.mics.application.objects.*;
+import bgu.spl.mics.application.services.GPUService;
 import bgu.spl.mics.application.services.StudentService;
+import bgu.spl.mics.application.services.TimeService;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -29,15 +31,37 @@ public class CRMSRunner {
         Data data = new Data(Images,200000);
         Future<Model> f = new Future();
         Model m = new Model("YOLO10",data,student);
-        StudentService studentService = new StudentService("check", student);
 
-        Thread studentThread =  new Thread(studentService);
+
+        Thread threadGpuService1 = new Thread (new GPUService("2",g2));
+        Thread threadGpuService2 = new Thread (new GPUService("1",g1));
+        Thread threadStudent = new Thread ( new StudentService("check", student));
+        Thread threadTimeService = new Thread (new TimeService(2));
+
+
+        threadGpuService1.start();
+        threadGpuService2.start();
+        threadStudent.start();
+        threadTimeService.start();
+
+        try {
+            threadGpuService1.join();
+            threadGpuService2.join();
+            threadStudent.join();
+            threadTimeService.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+
+        /*Thread studentThread =  new Thread(studentService);
         studentThread.start();
         try {
             studentThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
 
     }
 }
