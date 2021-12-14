@@ -5,9 +5,12 @@ import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.TestModelEvent;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.messages.TrainModelEvent;
+import bgu.spl.mics.application.objects.DataBatch;
 import bgu.spl.mics.application.objects.GPU;
 import bgu.spl.mics.application.objects.Model;
-import bgu.spl.mics.application.objects.Student;
+
+import java.util.PriorityQueue;
+import java.util.Vector;
 
 /**
  * GPU service is responsible for handling the
@@ -19,10 +22,11 @@ import bgu.spl.mics.application.objects.Student;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class GPUService extends MicroService {
-
+    PriorityQueue<Event<Model>> messegequeue;//queue for messeges i cant handle at the momoent
     int tick = 0;
     private GPU gpu;
-
+    Event<Model> modelEvent;
+    private boolean isprocess;
     public GPUService(String name,GPU gpu) {
         super(name);
         this.gpu = gpu;
@@ -30,22 +34,39 @@ public class GPUService extends MicroService {
     public GPUService(String name){
         super(name);
     }
-    public void startProcessingTestEvent(TestModelEvent event){
-        double prob=Math.random();
-        if(event.getStudentdegree()== Student.Degree.MSc & prob>0.4)
-            event.getModel().setResult(Model.Result.Good);
-        else if(event.getStudentdegree()== Student.Degree.PhD & prob>0.2)
-            event.getModel().setResult(Model.Result.Good);
-        else
-            event.getModel().setResult(Model.Result.Bad);
-    }
-    public void startProcessingTrainEvent(TrainModelEvent event){}
+
     @Override
     protected void initialize() {
-        subscribeBroadcast(TickBroadcast.class , (TickBroadcast e) -> {tick++;});
-        subscribeEvent(TrainModelEvent.class, (TrainModelEvent event)-> startProcessingTrainEvent(event));
-        subscribeEvent(TestModelEvent.class, (TestModelEvent event)-> startProcessingTestEvent(event));
+        subscribeBroadcast(TickBroadcast.class , (TickBroadcast e) -> {setTick();});
+        subscribeEvent(TrainModelEvent.class, (TrainModelEvent event)-> {gpu.startProcessingTrainEvent(event);});
+        subscribeEvent(TestModelEvent.class, (TestModelEvent event)-> {gpu.startProcessingTestEvent(event);});
 
+    }
+    private void setEvent(Event<Model> ev){
+        this.modelEvent=ev;
+        this.isprocess=true;
+    }
+    /*
+    change the status of the current event to trained
+    make it complete
+     */
+    public void finish(Vector<DataBatch> vec){
+
+    }
+    /*
+    recieving the event for the first time
+    if the gpu is working it will move it to the queue
+     */
+    public void handleTrainEvent(Event<Model> ev){
+        if(isprocess)
+            messegequeue.add(ev);
+    }
+
+    private void setTick() {
+        if(gpu.isInproccese()) {
+            tick++;
+
+        }
     }
 
 }

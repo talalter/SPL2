@@ -10,13 +10,19 @@ import java.util.*;
  */
 public class Cluster {
 	Set<GPU> gpuSet;
-	Set<CPU> cpuSet;
+	//Set<CPU> cpuSet;
+	PriorityQueue<CPU> CpusQueue;
 	private static class ClusterHolder {
 		private static Cluster instance = new Cluster();
 	}
 	private Cluster(){
 		this.gpuSet = new HashSet<GPU>();
-		this.cpuSet = new HashSet<CPU>();
+		this.CpusQueue = new PriorityQueue<CPU>(new Comparator<CPU>() {
+			@Override
+			public int compare(CPU o1, CPU o2) {
+				return (o1.sizeOfCollections()/o1.getCores()) - (o2.sizeOfCollections()/o2.getCores());
+			}
+		});
 	}
 
 	/**
@@ -30,7 +36,8 @@ public class Cluster {
 		this.gpuSet.add(gpu);
 	}
 	public void addCpu(CPU cpu){
-		this.cpuSet.add(cpu);
+		this.CpusQueue.add(cpu);
 	}
+
 
 }

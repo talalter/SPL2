@@ -1,5 +1,8 @@
 package bgu.spl.mics.application.objects;
 
+import bgu.spl.mics.application.messages.TestModelEvent;
+import bgu.spl.mics.application.messages.TrainModelEvent;
+
 import java.util.Vector;
 
 /**
@@ -18,7 +21,7 @@ public class GPU {
 
     enum Type {RTX3090, RTX2080, GTX1080}
     private Model model;
-
+    private boolean inproccese;
     public Vector<DataBatch> getUnProcessedDataBatchVector() {
         return unProcessedDataBatchVector;
     }
@@ -28,6 +31,11 @@ public class GPU {
     }
 
     private Cluster cluster;
+
+    public boolean isInproccese() {
+        return inproccese;
+    }
+
     private Type type;
     private int dataBatchSize;
     private Vector<DataBatch> unProcessedDataBatchVector;
@@ -66,6 +74,18 @@ public class GPU {
             this.unProcessedDataBatchVector.add(db);
         }
         sendBatches(unProcessedDataBatchVector);
+    }
+    public void startProcessingTestEvent(TestModelEvent event){
+        double prob=Math.random();
+        if(event.getStudentdegree()== Student.Degree.MSc & prob>0.4)
+            event.getModel().setResult(Model.Result.Good);
+        else if(event.getStudentdegree()== Student.Degree.PhD & prob>0.2)
+            event.getModel().setResult(Model.Result.Good);
+        else
+            event.getModel().setResult(Model.Result.Bad);
+    }
+    public void startProcessingTrainEvent(TrainModelEvent event){
+
     }
 
     public void sendBatches(Vector v){
