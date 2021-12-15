@@ -19,8 +19,7 @@ public class CRMSRunner {
 
     public static void main(String[] args) {
         Vector<Model> models = new Vector<Model>();
-        models.add(new Model());
-        models.add(new Model());
+
         Cluster c = Cluster.getInstance();
         GPU g1 = new GPU(c);
         GPU g2 = new GPU(c);
@@ -31,30 +30,35 @@ public class CRMSRunner {
         c.addCpu(c1);
         c.addCpu(c2);
         Student student = new Student("Simba", "Computer Science",PhD,models);
+        models.add(new Model(student));
+        models.add(new Model(student));
         Data data = new Data(Images,200000);
         Future<Model> f = new Future();
         Model m = new Model("YOLO10",data,student);
 
 
-        Thread threadGpuService1 = new Thread (new GPUService("2",g2));
-        Thread threadGpuService2 = new Thread (new GPUService("1",g1));
-        Thread threadStudent = new Thread ( new StudentService("check",student));
-        Thread threadTimeService = new Thread (new TimeService(2));
+        //Thread threadGpuService1 = new Thread (new GPUService("2",g2));
+        //Thread threadGpuService2 = new Thread (new GPUService("1",g1));
+        //Thread threadStudent = new Thread ( new StudentService("check",student));
+        Thread threadTimeService = new Thread (new TimeService(1,2));
 
 
-        threadGpuService1.start();
-        threadGpuService2.start();
-        threadStudent.start();
+        //threadGpuService1.start();
+        //threadGpuService2.start();
+        //threadStudent.start();
         threadTimeService.start();
 
         try {
-            threadGpuService1.join();
-            threadGpuService2.join();
-            threadStudent.join();
+            //threadGpuService1.join();
+            //threadGpuService2.join();
+            //threadStudent.join();
             threadTimeService.join();
+            System.out.println("CRMSRunner 50");
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        System.out.println("finito");
 
 
 

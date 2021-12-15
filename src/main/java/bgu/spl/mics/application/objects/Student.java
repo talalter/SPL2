@@ -23,7 +23,9 @@ public class Student {
     public Vector<Model> getModels() {
         return models;
     }
-
+    public Degree getStatus(){
+        return this.status;
+    }
     public Student(String name, String department, Degree status, Vector<Model> models){
         this.name=name;
         this.department = department;
