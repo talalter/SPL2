@@ -7,7 +7,6 @@ import bgu.spl.mics.application.messages.TickBroadcast;
 import java.sql.Time;
 import java.time.Clock;
 import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * TimeService is the global system timer There is only one instance of this micro-service.
@@ -19,44 +18,32 @@ import java.util.TimerTask;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class TimeService extends MicroService{
-	Timer timer;
-	TimerTask task;
-	int tickTime;
+	Clock clock;
+	int timeTicks;
 	long duration;
-	public TimeService(int tickTime, long duration) {
+	public TimeService(int timeTicks) {
 		super("Timer");
-		this.duration = duration;
-		this.tickTime = tickTime;
-		timer = new Timer();
-		TimerTask task = null;
-
+		this.timeTicks = timeTicks;
+		System.out.println("Time Service Constructor");
+		this.duration = 500000000;
 	}
 	@Override
 	protected void initialize() {
-		System.out.println(Thread.currentThread().getName());
-		System.out.println("microService line 37");
-		final long[] duration = {this.duration};
-		task = new TimerTask() {
 
-			@Override
-			public void run() {
-				if(duration[0] > 0){
-					sendBroadcast(new TickBroadcast());
-					System.out.println(Thread.currentThread().getName());
-					System.out.println("lalala");
-					duration[0]--;
-				}
-				else{
-					timer.cancel();
-					System.out.println("now start terminate");
-					terminate();
-					Thread.currentThread().interrupt();
-				}
+		clock = Clock.systemDefaultZone();
+		long milliSeconds = clock.millis();
+		System.out.println(milliSeconds+ " " + clock.millis());
+		while(clock.millis()<duration+milliSeconds) {
+			System.out.println(clock.millis());
+			sendBroadcast(new TickBroadcast());
+			try {
+
+				Thread.currentThread().sleep(timeTicks);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
+		}
 
-		};
-		timer.scheduleAtFixedRate(task,0, this.tickTime*1000);
 	}
-
 
 }
