@@ -50,7 +50,9 @@ public class Model {
         this.status = Status.PreTrained;
         this.result=Result.None;
     }
-    public Model(){}
+    public Model(Student student){
+        this.student=student;
+    }
 
     public void setStatus(Status status) {
         this.status = status;

@@ -12,39 +12,52 @@ import java.util.Vector;
  */
 public class CPU{
     int cores;
-
+    int time;
     public int getCores() {
         return cores;
     }
     public int sizeOfCollections(){
-        return this.dataCurrentlyProccesing.size();
+        return 0;
+        // return this.dataCurrentlyProccesing.size();
     }
 
     Collection<DataBatch> dataCurrentlyProccesing;
     Cluster cluster;
-    int time;
 
     CPU (int cores, Cluster cluster){
         this.cores = cores;
         this.cluster = cluster;
         this.dataCurrentlyProccesing = new Vector<DataBatch>();
+        this.time = 0;
     }
     public CPU(Cluster c){
         this.cluster = c;
     }
 
     public void ProcessData(Vector<DataBatch> dataToProcess){
-        switch (dataToProcess.firstElement().getData().getType()) {
-            case Images:
-                this.time = (32 / this.cores) * 4;
-            case Text:
-                this.time = (32 / this.cores) * 2;
-                ;
-            case Tabular:
-                this.time = (32 / this.cores);
+        int timeToProcess;
+        for(DataBatch dataBatch : dataToProcess) {
+            switch (dataBatch.getData().getType()) {
+                case Images:
+                    timeToProcess = (32 / this.cores) * 4;
+                    if (time > timeToProcess) {
+                        time -= timeToProcess;
+                    }
+                case Text:
+                    timeToProcess = (32 / this.cores) * 4;
+                    if (time > timeToProcess) {
+                        time -= timeToProcess;
+                    }
+                case Tabular:
+                    timeToProcess = (32 / this.cores) * 4;
+                    if (time > timeToProcess) {
+                        time -= timeToProcess;
+                    }
+            }
         }
-        for (DataBatch db : dataToProcess){
-            db.setProcessed(true);
-        }
+    }
+
+    public void setTime(){
+        this.time++;
     }
 }

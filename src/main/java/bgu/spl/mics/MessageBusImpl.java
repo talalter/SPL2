@@ -62,10 +62,9 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public void sendBroadcast(Broadcast b) {
-		for (MicroService m : message_service.get(b.getClass())) {
+		/*for (MicroService m : message_service.get(b.getClass())) {
 			service_message.get(m).add(b);
-		}
-		//notifyAll();
+		}*/
 	}
 
 
@@ -98,9 +97,12 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public void unregister(MicroService m) {
+		System.out.println("MessageBus 100");
+
 		service_message.remove(m);
 		for (Map.Entry<Class<? extends Message>,Vector<MicroService>> pair : message_service.entrySet()){
 			for (int i = 0; i < pair.getValue().size(); i++) {
+				System.out.println("MessageBus 105");
 				pair.getValue().remove(m);
 			}
 		}
