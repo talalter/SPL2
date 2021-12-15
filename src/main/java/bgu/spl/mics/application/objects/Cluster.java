@@ -12,17 +12,26 @@ public class Cluster {
 	Set<GPU> gpuSet;
 	//Set<CPU> cpuSet;
 	PriorityQueue<CPU> CpusQueue;
+	int numofprosseseddata;
+
+
 	private static class ClusterHolder {
 		private static Cluster instance = new Cluster();
 	}
 	private Cluster(){
 		this.gpuSet = new HashSet<GPU>();
+		this.numofprosseseddata=0;
 		this.CpusQueue = new PriorityQueue<CPU>(new Comparator<CPU>() {
 			@Override
 			public int compare(CPU o1, CPU o2) {
 				return (o1.getCores() - o2.getCores());
 			}
 		});
+	}
+	public synchronized void recieveDBfromgpu(Vector<DataBatch> vec) {//TODO
+	}
+	public synchronized Vector<DataBatch> withdrawDB(int maxCapacity){
+		return null;
 	}
 
 	/**
