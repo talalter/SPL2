@@ -10,7 +10,7 @@ public class Model {
 
 
 
-    enum Status {PreTrained,Training, Trained, Tested}
+    public enum Status {PreTrained,Training, Trained, Tested}
     public enum Result {None,Good,Bad}
     private String name;
     private Data data;
