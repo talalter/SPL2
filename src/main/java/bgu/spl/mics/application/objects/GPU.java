@@ -18,36 +18,36 @@ public class GPU {
 
     enum Type {RTX3090, RTX2080, GTX1080}
     private Model model;
-
-    public Vector<DataBatch> getUnProcessedDataBatchVector() {
-        return unProcessedDataBatchVector;
-    }
-
-    public Vector<DataBatch> getProcessedDataBatchVector() {
-        return processedDataBatchVector;
-    }
-
     private Cluster cluster;
     private Type type;
-    private int dataBatchSize;
+    private int maxDataBatchSize; //32
     private Vector<DataBatch> unProcessedDataBatchVector;
-    private Vector<DataBatch> processedDataBatchVector;
+    private Vector<DataBatch> processedDataBatchVector; //27
+    private int spaceForNewDataBatches(){
+        return this.maxDataBatchSize - processedDataBatchVector.size();
+    }
     GPU(Type type, Model model, Cluster cluster){
         this.type = type;
         this.model = model;
         this.cluster = cluster;
         switch (this.type){
             case RTX3090:
-                this.dataBatchSize = 32;
+                this.maxDataBatchSize = 32;
             case RTX2080:
-                this.dataBatchSize = 16;
+                this.maxDataBatchSize = 16;
             case GTX1080:
-                this.dataBatchSize = 8;
+                this.maxDataBatchSize = 8;
         }
         this.unProcessedDataBatchVector =  new Vector<DataBatch>();
         this.processedDataBatchVector =  new Vector<DataBatch>();
 
 
+    }
+    public Vector<DataBatch> getUnProcessedDataBatchVector() {
+        return unProcessedDataBatchVector;
+    }
+    public Vector<DataBatch> getProcessedDataBatchVector() {
+        return processedDataBatchVector;
     }
     public GPU(Cluster c){
         this.cluster = c;

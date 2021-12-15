@@ -5,6 +5,7 @@ import bgu.spl.mics.application.objects.Cluster;
 import bgu.spl.mics.application.objects.Data;
 import bgu.spl.mics.application.objects.GPU;
 import bgu.spl.mics.application.objects.Model;
+import bgu.spl.mics.application.services.TimeService;
 
 import java.util.HashMap;
 
@@ -32,6 +33,7 @@ public abstract class MicroService implements Runnable {
     private String name;
     private MessageBus mb;
     protected Cluster cluster;
+    //<Callback <Massage>> instead of Callback
     protected HashMap<Class<? extends Message>,Callback> reactions;
     private HashMap<Event,Future> event;
     Boolean terminate;
@@ -158,8 +160,15 @@ public abstract class MicroService implements Runnable {
      * message.
      */
     protected final void terminate() {
-        terminate=true;
+        terminated=true;
         mb.unregister(this);
+        if (this.getClass() == TimeService.class){
+            System.out.println("MicroService 167");
+            Thread.currentThread().interrupt();
+            System.out.println("MicroService 169");
+
+        }
+
     }
 
     /**
@@ -182,18 +191,28 @@ public abstract class MicroService implements Runnable {
 
         mb.register(this); //When the Micro-Service starts executing the run method, it registers itself with the
         //Message-Bus and then calls the abstract initialize method
+        System.out.println("MicroService 196");
+
         initialize();
+        System.out.println("MicroService 199");
+        System.out.println(terminated);
         while (!terminated) {
             Message message = null;
+            System.out.println("MicroService 201");
+
             try {
                 message = mb.awaitMessage(this);
+                System.out.println("MicroService 205");
+
                 reactions.get(message.getClass()).call(message);
+                System.out.println("MicroService 208");
                 //callback.call(new TrainModelEvent());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
         mb.unregister(this);
+        System.out.println("MicroService 214");
 
 
 

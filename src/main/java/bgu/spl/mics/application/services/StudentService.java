@@ -31,7 +31,7 @@ public class StudentService extends MicroService {
     Student student;
 
     Vector<Model> models = new Vector<Model>();
-    TrainModelEvent t1 = new TrainModelEvent(new Model());
+    TrainModelEvent t1 = new TrainModelEvent(new Model(student));
     Class c1 = t1.getClass();
     Class trainModelEventClass = TrainModelEvent.class;
     Class TestModelEventClass = TestModelEvent.class;
@@ -47,6 +47,8 @@ public class StudentService extends MicroService {
         subscribeEvent(PublishResultsEvent.class, a -> System.out.println("LALALA"));
         for (Model m : student.getModels()){
             sendEvent(new TrainModelEvent(m));
+            sendEvent(new TestModelEvent(m.getStudent().getStatus(),m));
+
         }
         /*for (Model m: student.getModels()){
             if(m.getStatus()==Trained){
