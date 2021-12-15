@@ -18,7 +18,7 @@ public class GPUTest {
     static Vector<DataBatch>  dbVec;
     @Before
     public void setUp() throws Exception {
-        GPU gpu = new GPU (GPU.Type.RTX3090,model,cluster);
+        //GPU gpu = new GPU (GPU.Type.RTX3090,model,cluster);
         Cluster cluster = Cluster.getInstance();
         cluster.addGpu(gpu);
         Model model = new Model ("check", data, student);
@@ -39,7 +39,7 @@ public class GPUTest {
     public void testReciveMessageToTrainModel() {
 
         int size = gpu.getUnProcessedDataBatchVector().size();
-        gpu.ReciveMessageToTrainModel();
+       // gpu.ReciveMessageToTrainModel();
         int size_after=gpu.getUnProcessedDataBatchVector().size();
         assertTrue(size+4==size_after);
     }
@@ -51,7 +51,7 @@ public class GPUTest {
         dbVec.add(new DataBatch(data,0,gpu));
         dbVec.add(new DataBatch(data,0,gpu));
         dbVec.add(new DataBatch(data,0,gpu));
-        gpu.reciveBatches(dbVec);
+       // gpu.reciveBatches(dbVec);
         int size_after=gpu.getProcessedDataBatchVector().size();
         assertTrue(size+4==size_after);
     }
