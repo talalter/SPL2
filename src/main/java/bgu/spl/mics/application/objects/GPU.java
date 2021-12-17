@@ -11,74 +11,115 @@ import java.util.Vector;
  * Add fields and methods to this class as you see fit (including public methods and constructors).
  */
 public class GPU {
-
-    public GPU() {
-
-    }
-
-    /**
-     * Enum representing the type of the GPU.
-     */
-
     enum Type {RTX3090, RTX2080, GTX1080}
     private int capacity;
     private int tickstoTrain;
     private int numofBatches;//number of batches we need to prossses for current model
     private int ticksforCurrentDataBatch;
+    private int howmanytosend;//this is the number of db i can get back
     private boolean inprocces;
     private boolean isFinished;
     private Model model;
     private Cluster cluster;
     private Type type;
     private DataBatch inprogressdata;
+    private int databackfromclustcounter;
     private Vector<DataBatch> unProcessedDataBatchVector;
     private Vector<DataBatch> processedDataBatchVector; //that data is waiting to be prossessed
     private Vector<DataBatch> TrainedDataVector;
-    public GPU(String typeString, Cluster cluster) {
+    //---------------------------CONSTRUCTORS-------------------------------------------
+    public GPU(String typeString, Model model, Cluster cluster){
         this.cluster = cluster;
-        switch (typeString) {
-            case "RTX3090": {
+        switch (typeString){
+            case "RTX3090":{
                 this.capacity = 32;
-                this.tickstoTrain = 1;
-                this.type = Type.RTX3090;
+                this.tickstoTrain=1;
+                this.type=Type.RTX3090;
             }
-            case "RTX2080": {
+            case "RTX2080":{
                 this.capacity = 16;
-                this.tickstoTrain = 2;
-                this.type = Type.RTX2080;
+                this.tickstoTrain=2;
+                this.type=Type.RTX2080;
             }
-            case "GTX1080": {
+            case "GTX1080":{
                 this.capacity = 8;
-                this.tickstoTrain = 4;
-                this.type = Type.GTX1080;
+                this.tickstoTrain=4;
+                this.type=Type.GTX1080;
             }
         }
-        this.model = null;
-        this.isFinished = false;
-        this.unProcessedDataBatchVector = new Vector<DataBatch>();
-        this.processedDataBatchVector = new Vector<DataBatch>();
-        this.TrainedDataVector = new Vector<DataBatch>();
-        this.inprogressdata = null;
-        this.inprocces = false;
-        //this.numofBatches = this.model.getData().getSize() / 1000;
-        for (int i = 0; i < numofBatches; i++) {
-            DataBatch db = new DataBatch(this.model.getData(), i * 1000, this);
-            this.unProcessedDataBatchVector.add(db);
-        }
-    }
-    public void SendData(){
-        /* TODO
-         *   take data from model
-         *  */
-    }
-
-    public void ReciveMessageToTrainModel(){
-        int batches = this.model.getData().getSize()/1000;
-        for(int i=0;i<batches;i++){
+        this.model=model;
+        this.isFinished=false;
+        this.unProcessedDataBatchVector =  new Vector<DataBatch>();
+        this.processedDataBatchVector =  new Vector<DataBatch>();
+        this.TrainedDataVector=new Vector<DataBatch>();
+        this.inprogressdata=null;
+        this.inprocces=true;
+        this.numofBatches = this.model.getData().getSize()/1000;
+        for(int i=0;i<numofBatches;i++){
             DataBatch db=new DataBatch(this.model.getData(),i*1000,this);
             this.unProcessedDataBatchVector.add(db);
         }
-        sendBatches(unProcessedDataBatchVector);
+        this.howmanytosend=capacity;
+        this.databackfromclustcounter=0;
+
+
+    }
+
+    public GPU(){
+        isFinished=true;
+    }//construtor for testmodelevent
+//-------------------------------FUNCTIONS-------------------------------------------
+
+    //TODO
+    public void sendBatches(){
+
+        System.out.println("llllllllllllllllllllllllllllllllllll");
+
+        Vector<DataBatch> temp=new Vector<DataBatch>();
+        while(howmanytosend>0){
+            if(unProcessedDataBatchVector.size()!=0)
+                temp.add(unProcessedDataBatchVector.remove(0));
+            howmanytosend--;
+        }
+        cluster.recieveDBfromgpu(temp);
+    }
+    public void getBatchesFromCluster(){
+        System.out.println("llllllllllllllllllllllllllllllllllll");
+
+        Vector<DataBatch> temp=cluster.withdrawDB(capacity-processedDataBatchVector.size(),this);
+        for(int i=0;i<temp.size();i++){
+            processedDataBatchVector.add(temp.get(i));
+            howmanytosend++;
+            databackfromclustcounter++;
+        }
+        if(inprogressdata==null &processedDataBatchVector.size()!=0) {
+            inprogressdata = processedDataBatchVector.remove(0);
+            ticksforCurrentDataBatch=tickstoTrain;
+            inprocces=true;
+        }
+    }
+    public void onTick(){
+        System.out.println("llllllllllllllllllllllllllllllllllll");
+
+        getBatchesFromCluster();
+        sendBatches();
+        if(inprogressdata!=null){
+            ticksforCurrentDataBatch--;
+            if(ticksforCurrentDataBatch==0){
+                TrainedDataVector.add(inprogressdata);
+                if(!processedDataBatchVector.isEmpty()){
+                    inprogressdata=processedDataBatchVector.remove(0);
+                    ticksforCurrentDataBatch=tickstoTrain;
+                }else{
+                    inprocces=false;//only training data is count as gpu process
+                    if(TrainedDataVector.size()==numofBatches){
+                        model.setStatus(Model.Status.Trained);
+                        isFinished=true;
+                    }
+                }
+            }
+        }
+
     }
     public void startProcessingTestEvent(TestModelEvent event){
         double prob=Math.random();
@@ -89,26 +130,26 @@ public class GPU {
         else
             event.getModel().setResult(Model.Result.Bad);
     }
-    public void startProcessingTrainEvent(TrainModelEvent event){
-
+    //----------------------GETTERS--------------------------------------------------------------
+    public Vector<DataBatch> getUnProcessedDataBatchVector() {
+        return unProcessedDataBatchVector;
+    }
+    public Vector<DataBatch> getProcessedDataBatchVector() {
+        return processedDataBatchVector;
+    }
+    public Vector<DataBatch> getTrainedDataVector() {return TrainedDataVector;}
+    public boolean isFinished() {return isFinished;}
+    public boolean isInprocces() {
+        return inprocces;
     }
 
-    public void sendBatches(Vector v){
-
+    public Model getModel() {
+        return model;
     }
 
-    public void reciveBatches(Vector v){
-
-    }
-
-    public void changeModel(Model model){
+    //----------------------SETTERS--------------------------------------------------------------
+    public void setModel(Model model) {
         this.model = model;
     }
-
-
-
-
-
-
 
 }

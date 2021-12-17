@@ -39,21 +39,20 @@ public class MessageBusImpl implements MessageBus {
 		message_future=new HashMap<Message,Future>();
 	}
 	@Override
-	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
+	public synchronized  <T> void  subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
 		if(message_service.get(type)==null)
 			message_service.put(type,new Vector<MicroService>());
 		message_service.get(type).add(m);
-		//notifyAll();
+		notifyAll();
 
 	}
 
 	@Override
-	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-		System.out.println("mblmpl 51");
+	public synchronized void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
 		if(message_service.get(type)==null)
 			message_service.put(type,new Vector<MicroService>());
 		message_service.get(type).add(m);
-		System.out.println("mblmp 56");
+		notifyAll();
 	}
 
 	@Override
@@ -66,7 +65,6 @@ public class MessageBusImpl implements MessageBus {
 	public void sendBroadcast(Broadcast b) {
 		for (MicroService m : message_service.get(b.getClass())) {
 			service_message.get(m).add(b);
-			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ lmpl 69");
 		}
 	}
 
@@ -85,7 +83,6 @@ public class MessageBusImpl implements MessageBus {
 			service_message.get(microservice).add(e);
 			Future<T> f = new Future<>();
 			message_future.put(e, f);
-			//notifyAll();
 			return f;
 		}
 		return null;
@@ -94,17 +91,13 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public synchronized void register(MicroService m) {
 		service_message.put(m, new Vector<Message>());
-
 	}
 
 	@Override
 	public void unregister(MicroService m) {
-		System.out.println("MessageBus 100");
-
 		service_message.remove(m);
 		for (Map.Entry<Class<? extends Message>,Vector<MicroService>> pair : message_service.entrySet()){
 			for (int i = 0; i < pair.getValue().size(); i++) {
-				System.out.println("MessageBus 105");
 				pair.getValue().remove(m);
 			}
 		}
@@ -115,14 +108,11 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public synchronized Message awaitMessage(MicroService m) throws InterruptedException {
 		while(service_message.get(m).isEmpty()) {
-			//System.out.println("mblmpl 118");
-			wait(500);
-			//System.out.println(Thread.currentThread().getName()+ "       lmpl 120");
+			wait(1000);
+			Thread.interrupted();
 		}
-		System.out.println("LMPL 122");
 		Vector<Message> tempService = service_message.get(m);
 		Message output=tempService.firstElement();
-		System.out.println("lmpl 125                     "+ output);
 		service_message.get(m).remove(output);
 		return output;
 

@@ -3,6 +3,7 @@ package bgu.spl.mics.application.services;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.messages.FinishBroadcast;
+import org.w3c.dom.ls.LSOutput;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -33,10 +34,10 @@ public class TimeService extends MicroService{
 		subscribeBroadcast(FinishBroadcast.class, a -> {
 			Thread.currentThread().interrupt();
 			terminate();
+			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+Thread.currentThread().getName()+"!!!!!!!!!!!!!!!!!!!!");
 		});
 		timer = new Timer();
 		System.out.println(Thread.currentThread().getName());
-		System.out.println("microService line 37");
 		final long[] duration = {this.duration};
 		task = new TimerTask() {
 			@Override
@@ -51,7 +52,6 @@ public class TimeService extends MicroService{
 				}
 				else{
 					System.out.println("Finish");
-					Thread.currentThread().interrupt();
 					task.cancel();
 					timer.cancel();
 					timer.purge();
@@ -62,7 +62,6 @@ public class TimeService extends MicroService{
 				}
 
 			}
-
 		};
 		System.out.println(Thread.currentThread().getName());
 		timer.scheduleAtFixedRate(task,0, this.tickTime*1000);

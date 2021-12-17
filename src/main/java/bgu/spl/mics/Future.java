@@ -1,5 +1,7 @@
 package bgu.spl.mics;
 
+import bgu.spl.mics.application.objects.Model;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -44,10 +46,11 @@ public class Future<T> {
 	/**
 	 * Resolves the result of this Future object.
 	 */
-	public void resolve (T result) {
+	public synchronized void resolve (T result) {
 		this.result=result;
-		isDone=true;
-		//notifyAll();
+		if(result != Model.Status.Trained)
+			isDone=true;
+		notifyAll();
 	}
 
 	/**

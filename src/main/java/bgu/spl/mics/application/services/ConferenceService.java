@@ -21,11 +21,11 @@ import java.util.Vector;
 
 public class ConferenceService extends MicroService {
     static Vector<Conference> conferences = new Vector<Conference>();
-    Conference confrence;
+    Conference conference;
     int timeTicks;
     public ConferenceService(Conference conference) {
         super("Conf");
-        this.confrence=conference;
+        this.conference =conference;
     }
 
     @Override
@@ -37,13 +37,13 @@ public class ConferenceService extends MicroService {
         });
 
         subscribeEvent(PublishResultsEvent.class, (PublishResultsEvent pre) -> {
-            confrence.addModel(pre.getModel());
+            conference.addModel(pre.getModel());
         });
         subscribeBroadcast(TickBroadcast.class, (TickBroadcast tb) -> {
             timeTicks++;
-            if(timeTicks == confrence.getDate()){
-                conferences.add(confrence);
-                sendBroadcast(new PublishConferenceBroadcast(confrence));
+            if(timeTicks == conference.getDate()){
+                conferences.add(conference);
+                sendBroadcast(new PublishConferenceBroadcast(conference));
             }
         });
 

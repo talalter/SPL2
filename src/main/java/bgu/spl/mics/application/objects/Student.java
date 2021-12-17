@@ -17,6 +17,15 @@ public class Student {
     private String department;
     private Degree status;
     private int publications;
+
+    public void upgradePublications() {
+        this.publications++;
+    }
+
+    public void setPapersRead(int papersRead) {
+        this.papersRead = papersRead;
+    }
+
     private int papersRead;
     private Vector<Model> models;
 

@@ -1,14 +1,13 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.Event;
+import bgu.spl.mics.Future;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.FinishBroadcast;
 import bgu.spl.mics.application.messages.TestModelEvent;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.messages.TrainModelEvent;
-import bgu.spl.mics.application.messages.FinishBroadcast;
-import bgu.spl.mics.application.objects.DataBatch;
-import bgu.spl.mics.application.objects.GPU;
-import bgu.spl.mics.application.objects.Model;
+import bgu.spl.mics.application.objects.*;
 
 import java.util.PriorityQueue;
 import java.util.Vector;
@@ -23,56 +22,74 @@ import java.util.Vector;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class GPUService extends MicroService {
-    PriorityQueue<Event<Model>> messegequeue;//queue for messeges i cant handle at the momoent
+    private Vector<Event> messegequeue;
     int tick = 0;
     private GPU gpu;
-    Event<Model> modelEvent;
+    TrainModelEvent modelEvent;
     private boolean isprocess;
-    public GPUService(GPU gpu) {
+    private String typestr;
+
+    public GPUService(String type) {
         super("GPU");
-        this.gpu = gpu;
-    }
-    public GPUService(String name){
-        super(name);
+        this.typestr = type;
+        this.messegequeue = new Vector<Event>();
     }
 
     @Override
     protected void initialize() {
+        subscribeBroadcast(TickBroadcast.class, (TickBroadcast e) -> setTick());
+        subscribeEvent(TrainModelEvent.class, (TrainModelEvent event) -> handleEvent(event));
+        subscribeEvent(TestModelEvent.class, (TestModelEvent event) -> handleEvent(event));
         subscribeBroadcast(FinishBroadcast.class, a -> {
             Thread.currentThread().interrupt();
             terminate();
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+Thread.currentThread().getName()+"!!!!!!!!!!!!!!!!!!!!");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!" + Thread.currentThread().getName() + "!!!!!!!!!!!!!!!!!!!!");
         });
-
-        subscribeBroadcast(TickBroadcast.class , (TickBroadcast e) -> {setTick();});
-        System.out.println("GPUSERVICE 41");
-        subscribeEvent(TrainModelEvent.class, (TrainModelEvent event)-> {gpu.startProcessingTrainEvent(event);});
-        subscribeEvent(TestModelEvent.class, (TestModelEvent event)-> {gpu.startProcessingTestEvent(event);});
-
     }
-    private void setEvent(Event<Model> ev){
-        this.modelEvent=ev;
-        this.isprocess=true;
-    }
+
     /*
     change the status of the current event to trained
     make it complete
      */
-    public void finish(Vector<DataBatch> vec){
-
-    }
     /*
     recieving the event for the first time
     if the gpu is working it will move it to the queue
      */
-    public void handleTrainEvent(Event<Model> ev){
-        if(isprocess)
+    public void handleEvent(TrainModelEvent ev) {
+        if (gpu != null && gpu.isInprocces())
             messegequeue.add(ev);
+        else {
+            complete(ev,Model.Status.Training);
+            gpu = new GPU(typestr, ev.getModel(), cluster);
+            complete(ev,Model.Status.Trained);
+        }
     }
 
+    public void handleEvent(TestModelEvent ev) {
+        if (gpu != null && gpu.isInprocces())
+            messegequeue.add(ev);
+        else {
+            gpu = new GPU();
+            gpu.startProcessingTestEvent(ev);
+            Model.Result res = gpu.getModel().getResult();
+            complete(ev,res);
+        }
+    }
     private void setTick() {
+        if(gpu!=null && gpu.isFinished()) {
+            complete(modelEvent, Model.Status.Training);
+            if (!messegequeue.isEmpty()) {
+                if (messegequeue.get(0).getClass() == TrainModelEvent.class)
+                    handleEvent((TrainModelEvent) messegequeue.remove(0));
+                else
+                    handleEvent((TestModelEvent) messegequeue.remove(0));
+            }
+        }
+        if(gpu!=null && gpu.isInprocces()) {
+            System.out.println("ccccccccccccccccccccccc");
+
             tick++;
-
+            gpu.onTick();
+        }
     }
-
 }

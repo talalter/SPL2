@@ -15,7 +15,7 @@ public class CRMSRunner {
     private static Data.Type Images;
 
     public static void main(String[] args) {
-        
+        System.out.println(Thread.activeCount());
         Vector<Model> simbaModels = new Vector<Model>();
         Data YOLO10DATA = new Data(Images,200000);
         Model YOLO10 = new Model("YOLO10", YOLO10DATA);
@@ -71,11 +71,11 @@ public class CRMSRunner {
 
         Cluster c = Cluster.getInstance();
 
-        GPU g1 = new GPU ("RTX3090",c);
+        /*GPU g1 = new GPU ("RTX3090",c);
         GPU g2 = new GPU ("RTX3090",c);
         GPU g3 = new GPU ("RTX2080",c);
         GPU g4 = new GPU ("GTX1080",c);
-
+*/
         CPU c1 = new CPU(32,c);
         CPU c2 = new CPU(32,c);
         CPU c3 = new CPU(32,c);
@@ -89,13 +89,12 @@ public class CRMSRunner {
         Conference conf3 = new Conference("CVPR",30000);
         Conference conf4 = new Conference("ECCV",40000);
         Conference conf5 = new Conference("AISTATS",50000);
-        System.out.println("lalala");
         Thread threadTimeService = new Thread (new TimeService(1,3));
-        System.out.println("lalala1111");
-        Thread gpuThread1 = new Thread(new GPUService(g1));
-        Thread gpuThread2 = new Thread(new GPUService(g2));
-        Thread gpuThread3 = new Thread(new GPUService(g3));
-        Thread gpuThread4 = new Thread(new GPUService(g4));
+
+        Thread gpuThread1 = new Thread(new GPUService("RTX3090"));
+        Thread gpuThread2 = new Thread(new GPUService("RTX3090"));
+        Thread gpuThread3 = new Thread(new GPUService("RTX2080"));
+        Thread gpuThread4 = new Thread(new GPUService("GTX1080"));
 
         Thread confThread1 = new Thread(new ConferenceService(conf1));
         Thread confThread2 = new Thread(new ConferenceService(conf2));
@@ -119,47 +118,47 @@ public class CRMSRunner {
 
 
         gpuThread1.start();  //1
-        //gpuThread2.start();  //2
-        //gpuThread3.start();  //3
-        //gpuThread4.start();  //4
-        //confThread1.start();  //5
-        //confThread2.start();  //6
-        //confThread3.start();  //7
-        //confThread4.start();  //8
-        //confThread5.start();  //9
+        gpuThread2.start();  //2
+        gpuThread3.start();  //3
+        gpuThread4.start();  //4
+        confThread1.start();  //5
+        confThread2.start();  //6
+        confThread3.start();  //7
+        confThread4.start();  //8
+        confThread5.start();  //9
         cpuThread1.start();  //10
-        //cpuThread2.start();  //11
-        //cpuThread3.start();  //12
-        //cpuThread4.start();  //13
-        //cpuThread5.start();  //14
-        //cpuThread6.start();  //15
-        //cpuThread7.start();  //16
+        cpuThread2.start();  //11
+        cpuThread3.start();  //12
+        cpuThread4.start();  //13
+        cpuThread5.start();  //14
+        cpuThread6.start();  //15
+        cpuThread7.start();  //16
         studentThread1.start();  //17
-        //studentThread2.start();  //18
-        //studentThread3.start();  //19
-        //studentThread4.start();  //20
+        studentThread2.start();  //18
+        studentThread3.start();  //19
+        studentThread4.start();  //20
         threadTimeService.start();  //21
         try {
             gpuThread1.join();
-            //gpuThread2.join();
-            //gpuThread3.join();
-            //gpuThread4.join();
-            //confThread1.join();
-            //confThread2.join();
-            //confThread3.join();
-            //confThread4.join();
-            //confThread5.join();
+            gpuThread2.join();
+            gpuThread3.join();
+            gpuThread4.join();
+            confThread1.join();
+            confThread2.join();
+            confThread3.join();
+            confThread4.join();
+            confThread5.join();
             cpuThread1.join();
-            //cpuThread2.join();
-            //cpuThread3.join();
-            //cpuThread4.join();
-            //cpuThread5.join();
-            //cpuThread6.join();
-            //cpuThread7.join();
+            cpuThread2.join();
+            cpuThread3.join();
+            cpuThread4.join();
+            cpuThread5.join();
+            cpuThread6.join();
+            cpuThread7.join();
             studentThread1.join();
-            //studentThread2.join();
-            //studentThread3.join();
-            //studentThread4.join();
+            studentThread2.join();
+            studentThread3.join();
+            studentThread4.join();
             threadTimeService.join();
         } catch (InterruptedException e) {
             e.printStackTrace();

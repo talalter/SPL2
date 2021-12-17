@@ -161,7 +161,6 @@ public abstract class MicroService implements Runnable {
      */
     protected synchronized final void terminate() {
         terminated=true;
-        mb.unregister(this);
         Thread.currentThread().interrupt();
 
 
@@ -181,44 +180,18 @@ public abstract class MicroService implements Runnable {
      */
     @Override
     public void run() {
-        System.out.println(Thread.currentThread().getName());
-
-        //All the callbacks that belong to the micro-service must be executed inside its own message-loop.
-        //Registration, Initialization, and Unregistration of the Micro-Service must be executed inside its run method.
-
-        mb.register(this); //When the Micro-Service starts executing the run method, it registers itself with the
-        //Message-Bus and then calls the abstract initialize method
-        System.out.println("MicroService 196");
-
+        mb.register(this);
         initialize();
-        System.out.println("MicroService 199");
-        System.out.println(terminated);
-        //while (!Thread.currentThread.isInterrupted())
-        while (!terminated) {
+        while (!Thread.currentThread().isInterrupted()) {
             Message message = null;
-            System.out.println(terminated+"           "+Thread.currentThread().getName());
-            System.out.println("MicroService 198");
             try {
-
                 message = mb.awaitMessage(this);
-                System.out.println("MicroService 202");
-
                 reactions.get(message.getClass()).call(message);
-                System.out.println("MicroService 205");
-                //callback.call(new TrainModelEvent());
             } catch (InterruptedException e) {
-                System.out.println("MicroService 208");
-                terminated = false;
-                Thread.currentThread().interrupt();
+                terminate();
             }
-            //terminated = true;
         }
         mb.unregister(this);
-        System.out.println("MicroService 214");
-        System.out.println(Thread.currentThread().getName()+"                MicroService 218");
-
-
-
     }
 
 }
