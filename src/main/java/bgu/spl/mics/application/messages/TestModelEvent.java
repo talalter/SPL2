@@ -5,11 +5,11 @@ import bgu.spl.mics.Message;
 import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.objects.Student;
 
-public class TestModelEvent implements Event<Model> {
-    Student.Degree studentdegree;
+public class TestModelEvent implements Event<Model.Result> {
+    Student.Degree studentDegree;
     Model model;
     public TestModelEvent(Student.Degree studentdegree,Model model) {
-        this.studentdegree = studentdegree;
+        this.studentDegree = studentdegree;
         this.model=model;
     }
 
@@ -18,7 +18,7 @@ public class TestModelEvent implements Event<Model> {
     }
 
     public Student.Degree getStudentdegree() {
-        return studentdegree;
+        return studentDegree;
     }
 
 

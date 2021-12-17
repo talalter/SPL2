@@ -16,12 +16,14 @@ public class GPU {
     private int tickstoTrain;
     private int numofBatches;//number of batches we need to prossses for current model
     private int ticksforCurrentDataBatch;
+    private int howmanytosend;//this is the number of db i can get back
     private boolean inprocces;
     private boolean isFinished;
     private Model model;
     private Cluster cluster;
     private Type type;
     private DataBatch inprogressdata;
+    private int databackfromclustcounter;
     private Vector<DataBatch> unProcessedDataBatchVector;
     private Vector<DataBatch> processedDataBatchVector; //that data is waiting to be prossessed
     private Vector<DataBatch> TrainedDataVector;
@@ -51,17 +53,18 @@ public class GPU {
         this.processedDataBatchVector =  new Vector<DataBatch>();
         this.TrainedDataVector=new Vector<DataBatch>();
         this.inprogressdata=null;
-        this.inprocces=false;
+        this.inprocces=true;
         this.numofBatches = this.model.getData().getSize()/1000;
         for(int i=0;i<numofBatches;i++){
             DataBatch db=new DataBatch(this.model.getData(),i*1000,this);
             this.unProcessedDataBatchVector.add(db);
         }
+        this.howmanytosend=capacity;
+        this.databackfromclustcounter=0;
+
 
     }
-    public GPU(Cluster c){
-        this.cluster = c;
-    }
+
     public GPU(){
         isFinished=true;
     }//construtor for testmodelevent
@@ -69,18 +72,26 @@ public class GPU {
 
     //TODO
     public void sendBatches(){
-        int howmanytosend=capacity-processedDataBatchVector.size();
+
+        System.out.println("llllllllllllllllllllllllllllllllllll");
+
         Vector<DataBatch> temp=new Vector<DataBatch>();
-        for(int i=0;i<howmanytosend;i++){
+        while(howmanytosend>0){
             if(unProcessedDataBatchVector.size()!=0)
                 temp.add(unProcessedDataBatchVector.remove(0));
+            howmanytosend--;
         }
         cluster.recieveDBfromgpu(temp);
     }
     public void getBatchesFromCluster(){
-        Vector<DataBatch> temp=cluster.withdrawDB(capacity-processedDataBatchVector.size());
-        for(int i=0;i<temp.size();i++)
+        System.out.println("llllllllllllllllllllllllllllllllllll");
+
+        Vector<DataBatch> temp=cluster.withdrawDB(capacity-processedDataBatchVector.size(),this);
+        for(int i=0;i<temp.size();i++){
             processedDataBatchVector.add(temp.get(i));
+            howmanytosend++;
+            databackfromclustcounter++;
+        }
         if(inprogressdata==null &processedDataBatchVector.size()!=0) {
             inprogressdata = processedDataBatchVector.remove(0);
             ticksforCurrentDataBatch=tickstoTrain;
@@ -88,6 +99,8 @@ public class GPU {
         }
     }
     public void onTick(){
+        System.out.println("llllllllllllllllllllllllllllllllllll");
+
         getBatchesFromCluster();
         sendBatches();
         if(inprogressdata!=null){
@@ -129,6 +142,11 @@ public class GPU {
     public boolean isInprocces() {
         return inprocces;
     }
+
+    public Model getModel() {
+        return model;
+    }
+
     //----------------------SETTERS--------------------------------------------------------------
     public void setModel(Model model) {
         this.model = model;

@@ -17,6 +17,15 @@ public class Student {
     private String department;
     private Degree status;
     private int publications;
+
+    public void upgradePublications() {
+        this.publications++;
+    }
+
+    public void setPapersRead(int papersRead) {
+        this.papersRead = papersRead;
+    }
+
     private int papersRead;
     private Vector<Model> models;
 
@@ -25,6 +34,10 @@ public class Student {
     }
     public Degree getStatus(){
         return this.status;
+    }
+
+    public void upgradePapersRead(){
+        this.papersRead++;
     }
     public Student(String name, String department, Degree status, Vector<Model> models){
         this.name=name;
