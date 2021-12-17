@@ -11,6 +11,7 @@ import java.util.Vector;
  * Add fields and methods to this class as you see fit (including public methods and constructors).
  */
 public class GPU {
+
     public GPU() {
 
     }
@@ -20,47 +21,51 @@ public class GPU {
      */
 
     enum Type {RTX3090, RTX2080, GTX1080}
+    private int capacity;
+    private int tickstoTrain;
+    private int numofBatches;//number of batches we need to prossses for current model
+    private int ticksforCurrentDataBatch;
+    private boolean inprocces;
+    private boolean isFinished;
     private Model model;
-    private boolean inproccese;
-    public Vector<DataBatch> getUnProcessedDataBatchVector() {
-        return unProcessedDataBatchVector;
-    }
-
-    public Vector<DataBatch> getProcessedDataBatchVector() {
-        return processedDataBatchVector;
-    }
-
     private Cluster cluster;
-
-    public boolean isInproccese() {
-        return inproccese;
-    }
-
     private Type type;
-    private int dataBatchSize;
+    private DataBatch inprogressdata;
     private Vector<DataBatch> unProcessedDataBatchVector;
-    private Vector<DataBatch> processedDataBatchVector;
-    GPU(Type type, Model model, Cluster cluster){
-        this.type = type;
-        this.model = model;
+    private Vector<DataBatch> processedDataBatchVector; //that data is waiting to be prossessed
+    private Vector<DataBatch> TrainedDataVector;
+    public GPU(String typeString, Cluster cluster) {
         this.cluster = cluster;
-        switch (this.type){
-            case RTX3090:
-                this.dataBatchSize = 32;
-            case RTX2080:
-                this.dataBatchSize = 16;
-            case GTX1080:
-                this.dataBatchSize = 8;
+        switch (typeString) {
+            case "RTX3090": {
+                this.capacity = 32;
+                this.tickstoTrain = 1;
+                this.type = Type.RTX3090;
+            }
+            case "RTX2080": {
+                this.capacity = 16;
+                this.tickstoTrain = 2;
+                this.type = Type.RTX2080;
+            }
+            case "GTX1080": {
+                this.capacity = 8;
+                this.tickstoTrain = 4;
+                this.type = Type.GTX1080;
+            }
         }
-        this.unProcessedDataBatchVector =  new Vector<DataBatch>();
-        this.processedDataBatchVector =  new Vector<DataBatch>();
-
-
+        this.model = null;
+        this.isFinished = false;
+        this.unProcessedDataBatchVector = new Vector<DataBatch>();
+        this.processedDataBatchVector = new Vector<DataBatch>();
+        this.TrainedDataVector = new Vector<DataBatch>();
+        this.inprogressdata = null;
+        this.inprocces = false;
+        //this.numofBatches = this.model.getData().getSize() / 1000;
+        for (int i = 0; i < numofBatches; i++) {
+            DataBatch db = new DataBatch(this.model.getData(), i * 1000, this);
+            this.unProcessedDataBatchVector.add(db);
+        }
     }
-    public GPU(Cluster c){
-        this.cluster = c;
-    }
-
     public void SendData(){
         /* TODO
          *   take data from model
@@ -94,6 +99,10 @@ public class GPU {
 
     public void reciveBatches(Vector v){
 
+    }
+
+    public void changeModel(Model model){
+        this.model = model;
     }
 
 

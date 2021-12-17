@@ -1,9 +1,8 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.Future;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.PublishResultsEvent;
-import bgu.spl.mics.application.messages.TestModelEvent;
-import bgu.spl.mics.application.messages.TrainModelEvent;
+import bgu.spl.mics.application.messages.*;
 import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.objects.Student;
 
@@ -31,31 +30,41 @@ public class StudentService extends MicroService {
     Student student;
 
     Vector<Model> models = new Vector<Model>();
-    TrainModelEvent t1 = new TrainModelEvent(new Model(student));
-    Class c1 = t1.getClass();
-    Class trainModelEventClass = TrainModelEvent.class;
-    Class TestModelEventClass = TestModelEvent.class;
+    Vector<Model> modelsToPublish = new Vector<Model>();
     private Model.Status Trained;
-    public StudentService(String name, Student student) {
-        super(name);
+    public StudentService(Student student) {
+        super("Student");
         this.student = student;
     }
 
     @Override
     protected void initialize() {
+        subscribeBroadcast(FinishBroadcast.class, a -> {
+            Thread.currentThread().interrupt();
+            terminate();
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+Thread.currentThread().getName()+"!!!!!!!!!!!!!!!!!!!!");
+        });
 
-        subscribeEvent(PublishResultsEvent.class, a -> System.out.println("LALALA"));
-        for (Model m : student.getModels()){
-            sendEvent(new TrainModelEvent(m));
-            sendEvent(new TestModelEvent(m.getStudent().getStatus(),m));
+        subscribeBroadcast(PublishConferenceBroadcast.class, (PublishConferenceBroadcast pcb) -> {
+            pcb.getConference().getModels().firstElement();
+        });
+        if(student.getModels()==null) {
 
+            return;
         }
-        /*for (Model m: student.getModels()){
-            if(m.getStatus()==Trained){
-                sendEvent(new TestModelEvent(m))
-            }
-        }*/
 
+        for (Model m : student.getModels()){
+            TrainModelEvent trainModelEvent = new TrainModelEvent(m);
+            TestModelEvent testModelEvent = new TestModelEvent(this.student.getStatus(),m);
+            Future<Model.Status> futureTrain = sendEvent(trainModelEvent);
+            futureTrain.resolve(Trained);
+            if(futureTrain.get()==Model.Status.Trained){
+                Future<Model.Result> futureTest = sendEvent(testModelEvent);
+                if(futureTest.get()== Model.Result.Good) {
+                    sendEvent(new PublishResultsEvent(m));
+                }
+            }
+        }
     }
 }
 

@@ -5,6 +5,7 @@ import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.TestModelEvent;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.messages.TrainModelEvent;
+import bgu.spl.mics.application.messages.FinishBroadcast;
 import bgu.spl.mics.application.objects.DataBatch;
 import bgu.spl.mics.application.objects.GPU;
 import bgu.spl.mics.application.objects.Model;
@@ -27,8 +28,8 @@ public class GPUService extends MicroService {
     private GPU gpu;
     Event<Model> modelEvent;
     private boolean isprocess;
-    public GPUService(String name,GPU gpu) {
-        super(name);
+    public GPUService(GPU gpu) {
+        super("GPU");
         this.gpu = gpu;
     }
     public GPUService(String name){
@@ -37,7 +38,14 @@ public class GPUService extends MicroService {
 
     @Override
     protected void initialize() {
+        subscribeBroadcast(FinishBroadcast.class, a -> {
+            Thread.currentThread().interrupt();
+            terminate();
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+Thread.currentThread().getName()+"!!!!!!!!!!!!!!!!!!!!");
+        });
+
         subscribeBroadcast(TickBroadcast.class , (TickBroadcast e) -> {setTick();});
+        System.out.println("GPUSERVICE 41");
         subscribeEvent(TrainModelEvent.class, (TrainModelEvent event)-> {gpu.startProcessingTrainEvent(event);});
         subscribeEvent(TestModelEvent.class, (TestModelEvent event)-> {gpu.startProcessingTestEvent(event);});
 
@@ -63,10 +71,8 @@ public class GPUService extends MicroService {
     }
 
     private void setTick() {
-        if(gpu.isInproccese()) {
             tick++;
 
-        }
     }
 
 }

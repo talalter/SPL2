@@ -24,7 +24,7 @@ public class CPU{
     Collection<DataBatch> dataCurrentlyProccesing;
     Cluster cluster;
 
-    CPU (int cores, Cluster cluster){
+    public CPU (int cores, Cluster cluster){
         this.cores = cores;
         this.cluster = cluster;
         this.dataCurrentlyProccesing = new Vector<DataBatch>();

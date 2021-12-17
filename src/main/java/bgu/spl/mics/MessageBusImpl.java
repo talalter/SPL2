@@ -43,15 +43,17 @@ public class MessageBusImpl implements MessageBus {
 		if(message_service.get(type)==null)
 			message_service.put(type,new Vector<MicroService>());
 		message_service.get(type).add(m);
+		//notifyAll();
 
 	}
 
 	@Override
 	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
+		System.out.println("mblmpl 51");
 		if(message_service.get(type)==null)
 			message_service.put(type,new Vector<MicroService>());
 		message_service.get(type).add(m);
-
+		System.out.println("mblmp 56");
 	}
 
 	@Override
@@ -62,11 +64,11 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public void sendBroadcast(Broadcast b) {
-		/*for (MicroService m : message_service.get(b.getClass())) {
+		for (MicroService m : message_service.get(b.getClass())) {
 			service_message.get(m).add(b);
-		}*/
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ lmpl 69");
+		}
 	}
-
 
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
@@ -90,7 +92,7 @@ public class MessageBusImpl implements MessageBus {
 	}
 
 	@Override
-	public void register(MicroService m) {
+	public synchronized void register(MicroService m) {
 		service_message.put(m, new Vector<Message>());
 
 	}
@@ -109,14 +111,21 @@ public class MessageBusImpl implements MessageBus {
 
 	}
 
+
 	@Override
 	public synchronized Message awaitMessage(MicroService m) throws InterruptedException {
-		while(service_message.get(m).isEmpty())
-			wait();
+		while(service_message.get(m).isEmpty()) {
+			//System.out.println("mblmpl 118");
+			wait(500);
+			//System.out.println(Thread.currentThread().getName()+ "       lmpl 120");
+		}
+		System.out.println("LMPL 122");
 		Vector<Message> tempService = service_message.get(m);
 		Message output=tempService.firstElement();
+		System.out.println("lmpl 125                     "+ output);
 		service_message.get(m).remove(output);
 		return output;
+
 	}
 
 

@@ -2,6 +2,7 @@ package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.messages.FinishBroadcast;
 import bgu.spl.mics.application.objects.CPU;
 
 /**
@@ -14,14 +15,20 @@ import bgu.spl.mics.application.objects.CPU;
 public class CPUService extends MicroService {
     CPU cpu;
     int tick = 0;
-    public CPUService(String name) {
-        super("Change_This_Name");
-        // TODO Implement this
+    public CPUService(CPU cpu) {
+        super("CPU");
+        this.cpu = cpu;
     }
 
     @Override
     protected void initialize() {
         // TODO Implement this
+        subscribeBroadcast(FinishBroadcast.class, a -> {
+            Thread.currentThread().interrupt();
+            terminate();
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+Thread.currentThread().getName()+"!!!!!!!!!!!!!!!!!!!!");
+        });
+
         subscribeBroadcast(TickBroadcast.class , tb -> {cpu.setTime();});
 
     }

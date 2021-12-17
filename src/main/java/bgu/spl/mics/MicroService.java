@@ -23,7 +23,7 @@ import java.util.HashMap;
  * message-queue (see {@link MessageBus#register(bgu.spl.mics.MicroService)}
  * method). The abstract MicroService stores this callback together with the
  * type of the message is related to.
- * 
+ *
  * Only private fields and methods may be added to this class.
  * <p>
  */
@@ -49,33 +49,33 @@ public abstract class MicroService implements Runnable {
         this.cluster=Cluster.getInstance();
         this.mb = MessageBusImpl.getInstance();
 
-    /**
-     * Subscribes to events of type {@code type} with the callback
-     * {@code callback}. This means two things:
-     * 1. Subscribe to events in the singleton event-bus using the supplied
-     * {@code type}
-     * 2. Store the {@code callback} so that when events of type {@code type}
-     * are received it will be called.
-     * <p>
-     * For a received message {@code m} of type {@code type = m.getClass()}
-     * calling the callback {@code callback} means running the method
-     * {@link Callback#call(java.lang.Object)} by calling
-     * {@code callback.call(m)}.
-     * <p>
-     * @param <E>      The type of event to subscribe to.
-     * @param <T>      The type of result expected for the subscribed event.
-     * @param type     The {@link Class} representing the type of event to
-     *                 subscribe to.
-     * @param callback The callback that should be called when messages of type
-     *                 {@code type} are taken from this micro-service message
-     *                 queue.
-     */
+        /**
+         * Subscribes to events of type {@code type} with the callback
+         * {@code callback}. This means two things:
+         * 1. Subscribe to events in the singleton event-bus using the supplied
+         * {@code type}
+         * 2. Store the {@code callback} so that when events of type {@code type}
+         * are received it will be called.
+         * <p>
+         * For a received message {@code m} of type {@code type = m.getClass()}
+         * calling the callback {@code callback} means running the method
+         * {@link Callback#call(java.lang.Object)} by calling
+         * {@code callback.call(m)}.
+         * <p>
+         * @param <E>      The type of event to subscribe to.
+         * @param <T>      The type of result expected for the subscribed event.
+         * @param type     The {@link Class} representing the type of event to
+         *                 subscribe to.
+         * @param callback The callback that should be called when messages of type
+         *                 {@code type} are taken from this micro-service message
+         *                 queue.
+         */
     }
 
     public MicroService() {
 
     }
-//
+    //
     protected final <T, E extends Event<T>> void subscribeEvent(Class<E> type, Callback<E> callback) {
         mb.subscribeEvent(type,this);
         reactions.put(type,callback);
@@ -159,15 +159,11 @@ public abstract class MicroService implements Runnable {
      * Signals the event loop that it must terminate after handling the current
      * message.
      */
-    protected final void terminate() {
+    protected synchronized final void terminate() {
         terminated=true;
         mb.unregister(this);
-        if (this.getClass() == TimeService.class){
-            System.out.println("MicroService 167");
-            Thread.currentThread().interrupt();
-            System.out.println("MicroService 169");
+        Thread.currentThread().interrupt();
 
-        }
 
     }
 
@@ -180,11 +176,12 @@ public abstract class MicroService implements Runnable {
     }
 
     /**
-     * The entry point of the micro-service. TODO: you must complete this code
+     * The entry point of the micro-service.
      * otherwise you will end up in an infinite loop.
      */
     @Override
-    public final void run() {
+    public void run() {
+        System.out.println(Thread.currentThread().getName());
 
         //All the callbacks that belong to the micro-service must be executed inside its own message-loop.
         //Registration, Initialization, and Unregistration of the Micro-Service must be executed inside its run method.
@@ -196,23 +193,29 @@ public abstract class MicroService implements Runnable {
         initialize();
         System.out.println("MicroService 199");
         System.out.println(terminated);
+        //while (!Thread.currentThread.isInterrupted())
         while (!terminated) {
             Message message = null;
-            System.out.println("MicroService 201");
-
+            System.out.println(terminated+"           "+Thread.currentThread().getName());
+            System.out.println("MicroService 198");
             try {
+
                 message = mb.awaitMessage(this);
-                System.out.println("MicroService 205");
+                System.out.println("MicroService 202");
 
                 reactions.get(message.getClass()).call(message);
-                System.out.println("MicroService 208");
+                System.out.println("MicroService 205");
                 //callback.call(new TrainModelEvent());
             } catch (InterruptedException e) {
+                System.out.println("MicroService 208");
+                terminated = false;
                 Thread.currentThread().interrupt();
             }
+            //terminated = true;
         }
         mb.unregister(this);
         System.out.println("MicroService 214");
+        System.out.println(Thread.currentThread().getName()+"                MicroService 218");
 
 
 
