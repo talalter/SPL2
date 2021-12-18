@@ -17,10 +17,10 @@ public class Data {
     private int size;
     public Data(String type, int size){
         switch (type){
-            case "images":{
+            case "Images":{
                 this.type=Type.Images;
             }
-            case "Test":{
+            case "Text":{
                 this.type=Type.Text;
             }
             case "Tabular":{

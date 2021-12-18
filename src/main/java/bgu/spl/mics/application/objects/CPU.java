@@ -51,25 +51,27 @@ public class CPU{
             for (DataBatch DB : temp) {
                 dataCurrentlyProccesing.add(DB);
             }
-            if (temp.size() != 0) {
-                tick++;
-                if (currentDB != null) {
-                    timeforcurrentDB--;
-                    if (timeforcurrentDB == 0) {
-                        cluster.recieveDBfromcpu(currentDB, this);
-                        currentDB = dataCurrentlyProccesing.remove(0);
-                        timeforcurrentDB = ProcessData(currentDB);
-                    }
-                } else {
-                    if (dataCurrentlyProccesing.size() != 0) {
-                        currentDB = dataCurrentlyProccesing.remove(0);
-                        timeforcurrentDB = ProcessData(currentDB);
-                        tick++;
-                        timeforcurrentDB--;
-                    } else
-                        currentDB = null;
+
+        }
+        tick++;
+        if (currentDB != null) {
+            timeforcurrentDB--;
+            if (timeforcurrentDB == 0) {
+                cluster.recieveDBfromcpu(currentDB, this);
+                if (dataCurrentlyProccesing.size() != 0) {
+                    currentDB = dataCurrentlyProccesing.remove(0);
+                    timeforcurrentDB = ProcessData(currentDB);
+                }else{
+                    currentDB=null;
                 }
             }
+        } else {
+            if (dataCurrentlyProccesing.size() != 0) {
+                currentDB = dataCurrentlyProccesing.remove(0);
+                timeforcurrentDB = ProcessData(currentDB);
+                timeforcurrentDB--;
+            } else
+                currentDB = null;
         }
     }
     public int getTick() {

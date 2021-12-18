@@ -34,7 +34,7 @@ public class TimeService extends MicroService{
 		subscribeBroadcast(FinishBroadcast.class, a -> {
 			Thread.currentThread().interrupt();
 			terminate();
-			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+Thread.currentThread().getName()+"!!!!!!!!!!!!!!!!!!!!");
+			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+"Thread time finish"+"!!!!!!!!!!!!!!!!!!!!");
 		});
 		timer = new Timer();
 		System.out.println(Thread.currentThread().getName());

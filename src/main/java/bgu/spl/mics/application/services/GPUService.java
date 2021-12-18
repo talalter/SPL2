@@ -43,7 +43,7 @@ public class GPUService extends MicroService {
         subscribeBroadcast(FinishBroadcast.class, a -> {
             Thread.currentThread().interrupt();
             terminate();
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!" + Thread.currentThread().getName() + "!!!!!!!!!!!!!!!!!!!!");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!" + "Thread gpu finish" + "!!!!!!!!!!!!!!!!!!!!");
         });
     }
 
@@ -56,12 +56,13 @@ public class GPUService extends MicroService {
     if the gpu is working it will move it to the queue
      */
     public void handleEvent(TrainModelEvent ev) {
+
         if (gpu != null && gpu.isInprocces())
             messegequeue.add(ev);
         else {
             complete(ev,Model.Status.Training);
             gpu = new GPU(typestr, ev.getModel());
-            complete(ev,Model.Status.Trained);
+            this.modelEvent = ev;
         }
     }
 
@@ -71,23 +72,23 @@ public class GPUService extends MicroService {
         else {
             gpu = new GPU();
             gpu.startProcessingTestEvent(ev);
-            Model.Result res = gpu.getModel().getResult();
-            complete(ev,res);
+            System.out.println("GPU 74 not coming here");
+            complete(ev,ev.getModel().getResult());
         }
     }
     private void setTick() {
         if(gpu!=null && gpu.isFinished()) {
-            complete(modelEvent, Model.Status.Training);
+            complete(modelEvent, Model.Status.Trained);
             if (!messegequeue.isEmpty()) {
-                if (messegequeue.get(0).getClass() == TrainModelEvent.class)
-                    handleEvent((TrainModelEvent) messegequeue.remove(0));
+                if (messegequeue.get(0).getClass() == TrainModelEvent.class){
+                    this.modelEvent = (TrainModelEvent)messegequeue.remove(0);
+                    handleEvent( modelEvent);
+                }
                 else
                     handleEvent((TestModelEvent) messegequeue.remove(0));
             }
         }
-        if(gpu!=null && gpu.isInprocces()) {
-            System.out.println("ccccccccccccccccccccccc");
-
+        else if(gpu!=null ) {
             tick++;
             gpu.onTick();
         }

@@ -74,10 +74,12 @@ public class GPU {
     public void sendBatches(){
         Vector<DataBatch> temp=new Vector<DataBatch>();
         while(howmanytosend>0){
-            if(unProcessedDataBatchVector.size()!=0)
+            if(unProcessedDataBatchVector.size()!=0) {
                 temp.add(unProcessedDataBatchVector.remove(0));
+            }
             howmanytosend--;
         }
+        System.out.println(temp.size()+"                 gpu 83              "+Thread.currentThread().getName());
         cluster.recieveDBfromgpu(temp);
     }
     public void getBatchesFromCluster(){
@@ -94,8 +96,10 @@ public class GPU {
         }
     }
     public void onTick(){
+        System.out.println();
         getBatchesFromCluster();
         sendBatches();
+        System.out.println("numOfBatches: "+numofBatches+"          TrainedDataVector.size(): "+TrainedDataVector.size());
         if(inprogressdata!=null){
             ticksforCurrentDataBatch--;
             if(ticksforCurrentDataBatch==0){
@@ -107,6 +111,7 @@ public class GPU {
                     inprocces=false;//only training data is count as gpu process
                     if(TrainedDataVector.size()==numofBatches){
                         model.setStatus(Model.Status.Trained);
+                        System.out.println("GPU                           112");
                         isFinished=true;
                     }
                 }

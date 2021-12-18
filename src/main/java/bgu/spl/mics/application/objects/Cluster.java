@@ -12,7 +12,6 @@ public class Cluster {
 	//CPUSDBforcomperator IS just for compartor TO KNOW HOW MANY ITEMS EACH CPU IS HANDLING AT THE MOMENT
 	private HashMap<CPU, Vector<DataBatch>> CPUSDBforcomperator;
 	private HashMap<CPU, Vector<DataBatch>> CPUSDB;
-	Set<GPU> gpuSet;
 	PriorityQueue<CPU> CpusQueue;
 	int numofprosseseddata;
 	Vector<DataBatch> unProcessDB;
@@ -25,7 +24,6 @@ public class Cluster {
 	}
 
 	private Cluster() {
-		this.gpuSet = new HashSet<GPU>();
 		this.numofprosseseddata = 0;
 		this.unProcessDB = new Vector<DataBatch>();
 		this.ProcessDB = new HashMap<GPU, Vector<DataBatch>>();
@@ -33,20 +31,25 @@ public class Cluster {
 		this.CPUSDBforcomperator = new HashMap<CPU, Vector<DataBatch>>();
 		this.CpusQueue = new PriorityQueue<CPU>(new Comparator<CPU>() {
 			@Override
+			// 				return (o1.getCores() / Math.max(1, CPUSDBforcomperator.get(o1).size()) - o2.getCores() / Math.max(1, CPUSDBforcomperator.get(o2).size()));
 			public int compare(CPU o1, CPU o2) {
-				return (o1.getCores() / Math.max(1, CPUSDBforcomperator.get(o1).size()) - o2.getCores() / Math.max(1, CPUSDBforcomperator.get(o2).size()));
+				return (o1.getCores() - o2.getCores());
 			}
 		});
 	}
 
 	public void recieveDBfromgpu(Vector<DataBatch> vec) {
 		synchronized (lockCPUSDB) {
-			/*for (DataBatch db : vec) {
-				CPU cpu = CpusQueue.poll();
-				CPUSDB.get(cpu).add(db);
-				CPUSDBforcomperator.get(cpu).add(db);
-				CpusQueue.add(cpu);
-			}*/
+			if(vec!=null) {
+				for (DataBatch db : vec) {
+					CPU cpu = CpusQueue.poll();
+					if (cpu != null) {
+						CPUSDB.get(cpu).add(db);
+						CPUSDBforcomperator.get(cpu).add(db);
+						CpusQueue.add(cpu);
+					}
+				}
+			}
 		}
 	}
 
@@ -70,27 +73,25 @@ public class Cluster {
 
 	public void addCPU(CPU cpu) {
 		synchronized (lockCPUSDB) {
-			CPUSDB.put(cpu, new Vector<DataBatch>());
 			CPUSDBforcomperator.put(cpu, new Vector<DataBatch>());
+			CPUSDB.put(cpu, new Vector<DataBatch>());
 			CpusQueue.add(cpu);
 		}
 	}
 
-	public void recieveDBfromcpu(DataBatch db, CPU cpu) {
-		ProcessDB.get(db.getGpu()).add(db);
+	public synchronized void recieveDBfromcpu(DataBatch db, CPU cpu) {
+		if(ProcessDB.containsKey(db.getGpu()))
+			ProcessDB.get(db.getGpu()).add(db);
+		else {
+			ProcessDB.put(db.getGpu(), new Vector<DataBatch>());
+			ProcessDB.get(db.getGpu()).add(db);
+		}
 		if (CPUSDBforcomperator.get(cpu).size() != 0)
 			CPUSDBforcomperator.get(cpu).remove(0);
 	}
-	
+
 	public static Cluster getInstance() {
 		return ClusterHolder.instance;
-	}
-
-	public void addGpu(GPU gpu){
-		this.gpuSet.add(gpu);
-	}
-	public void addCpu(CPU cpu){
-		this.CpusQueue.add(cpu);
 	}
 
 
