@@ -41,7 +41,7 @@ public class Model {
     public Model(String name, Data data){
         this.name=name;
         this.data = data;
-        this.status = Status.PreTrained;
+        this.status = null;
         this.result=Result.None;
     }
 

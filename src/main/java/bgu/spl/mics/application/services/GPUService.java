@@ -56,12 +56,13 @@ public class GPUService extends MicroService {
     if the gpu is working it will move it to the queue
      */
     public void handleEvent(TrainModelEvent ev) {
+
         if (gpu != null && gpu.isInprocces())
             messegequeue.add(ev);
         else {
             complete(ev,Model.Status.Training);
             gpu = new GPU(typestr, ev.getModel());
-            complete(ev,Model.Status.Trained);
+            this.modelEvent = ev;
         }
     }
 
@@ -77,10 +78,12 @@ public class GPUService extends MicroService {
     }
     private void setTick() {
         if(gpu!=null && gpu.isFinished()) {
-            complete(modelEvent, Model.Status.Training);
+            complete(modelEvent, Model.Status.Trained);
             if (!messegequeue.isEmpty()) {
-                if (messegequeue.get(0).getClass() == TrainModelEvent.class)
-                    handleEvent((TrainModelEvent) messegequeue.remove(0));
+                if (messegequeue.get(0).getClass() == TrainModelEvent.class){
+                    this.modelEvent = (TrainModelEvent)messegequeue.remove(0);
+                    handleEvent( modelEvent);
+                }
                 else
                     handleEvent((TestModelEvent) messegequeue.remove(0));
             }

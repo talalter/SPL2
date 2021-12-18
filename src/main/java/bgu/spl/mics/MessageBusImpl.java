@@ -59,7 +59,6 @@ public class MessageBusImpl implements MessageBus {
 	public <T> void complete(Event<T> e, T result) {
 		if(message_future.get(e)!=null)
 			message_future.get(e).resolve(result);
-
 	}
 
 	@Override
@@ -115,6 +114,7 @@ public class MessageBusImpl implements MessageBus {
 		Vector<Message> tempService = service_message.get(m);
 		Message output=tempService.firstElement();
 		service_message.get(m).remove(output);
+		//System.out.println(output+"                            lmpl 117");
 		return output;
 
 	}

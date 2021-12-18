@@ -79,7 +79,7 @@ public class Cluster {
 		}
 	}
 
-	public void recieveDBfromcpu(DataBatch db, CPU cpu) {
+	public synchronized void recieveDBfromcpu(DataBatch db, CPU cpu) {
 		if(ProcessDB.containsKey(db.getGpu()))
 			ProcessDB.get(db.getGpu()).add(db);
 		else {
@@ -89,7 +89,7 @@ public class Cluster {
 		if (CPUSDBforcomperator.get(cpu).size() != 0)
 			CPUSDBforcomperator.get(cpu).remove(0);
 	}
-	
+
 	public static Cluster getInstance() {
 		return ClusterHolder.instance;
 	}

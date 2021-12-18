@@ -5,7 +5,6 @@ import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.*;
 import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.objects.Student;
-import com.sun.javaws.IconUtil;
 
 import java.util.Vector;
 
@@ -33,6 +32,7 @@ public class StudentService extends MicroService {
     Vector<Model> models = new Vector<Model>();
     Vector<Model> modelsToPublish = new Vector<Model>();
     private Model.Status Trained;
+
     public StudentService(Student student) {
         super("Student");
         this.student = student;
@@ -43,34 +43,41 @@ public class StudentService extends MicroService {
         subscribeBroadcast(FinishBroadcast.class, a -> {
             Thread.currentThread().interrupt();
             terminate();
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+"Thread Student Finish"+"!!!!!!!!!!!!!!!!!!!!");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!" + "Thread student finish" + "!!!!!!!!!!!!!!!!!!!");
         });
 
         subscribeBroadcast(PublishConferenceBroadcast.class, (PublishConferenceBroadcast pcb) -> {
             pcb.getConference().getModels().firstElement();
         });
-        if(student.getModels()==null) {
+        if (student.getModels() == null) {
 
             return;
         }
 
-        for (Model m:student.getModels()) {
+        for (Model m : student.getModels()) {
             TrainModelEvent trainModelEvent = new TrainModelEvent(m);
-            TestModelEvent testModelEvent = new TestModelEvent(this.student.getStatus(),m);
+            TestModelEvent testModelEvent = new TestModelEvent(this.student.getStatus(), m);
             Future<Model.Status> futureTrain = sendEvent(trainModelEvent);
+            System.out.println("before train     " + m.getName() + "        " + Thread.currentThread().getName());
             //complete(trainModelEvent,Model.Status.Trained);
-            System.out.println("Before train           "+Thread.currentThread().getName()+ "   "+ m.getName());
-            if(futureTrain.get()==Model.Status.Trained){
-                System.out.println("After train");
-                Future<Model.Result> futureTest = sendEvent(testModelEvent);
-                //complete(testModelEvent, Model.Result.Good);
-                if(futureTest.get()==Model.Result.Good){
-                    System.out.println("Student 65 "+ Thread.currentThread().getName());
-                    this.student.upgradePublications();
-                    sendEvent(new PublishResultsEvent(m));
+            while (futureTrain.get() != Model.Status.Trained) {
+                try {
+                    System.out.println("waiting ss 64");
+                    wait(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-                System.out.println("Model is good");
             }
+            //if(m.getStatus()==Model.Status.Trained) {
+            System.out.println("after train     " + m.getName() + "        " + Thread.currentThread().getName());
+            Future<Model.Result> futureTest = sendEvent(testModelEvent);
+            //complete(testModelEvent, Model.Result.Good);
+            if (futureTest.get() == Model.Result.Good) {
+                //if (m.getResult() == Model.Result.Good) {
+                this.student.upgradePublications();
+                sendEvent(new PublishResultsEvent(m));
+            }
+            System.out.println("after test     " + m.getName() + "        " + Thread.currentThread().getName());
         }
     }
 }
