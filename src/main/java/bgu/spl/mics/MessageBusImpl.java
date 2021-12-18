@@ -39,19 +39,20 @@ public class MessageBusImpl implements MessageBus {
 		message_future=new HashMap<Message,Future>();
 	}
 	@Override
-	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
+	public synchronized  <T> void  subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
 		if(message_service.get(type)==null)
 			message_service.put(type,new Vector<MicroService>());
 		message_service.get(type).add(m);
+		notifyAll();
 
 	}
 
 	@Override
-	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
+	public synchronized void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
 		if(message_service.get(type)==null)
 			message_service.put(type,new Vector<MicroService>());
 		message_service.get(type).add(m);
-
+		notifyAll();
 	}
 
 	@Override
@@ -62,11 +63,10 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public void sendBroadcast(Broadcast b) {
-		/*for (MicroService m : message_service.get(b.getClass())) {
+		for (MicroService m : message_service.get(b.getClass())) {
 			service_message.get(m).add(b);
-		}*/
+		}
 	}
-
 
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
@@ -83,40 +83,39 @@ public class MessageBusImpl implements MessageBus {
 			service_message.get(microservice).add(e);
 			Future<T> f = new Future<>();
 			message_future.put(e, f);
-			//notifyAll();
 			return f;
 		}
 		return null;
 	}
 
 	@Override
-	public void register(MicroService m) {
+	public synchronized void register(MicroService m) {
 		service_message.put(m, new Vector<Message>());
-
 	}
 
 	@Override
 	public void unregister(MicroService m) {
-		System.out.println("MessageBus 100");
-
 		service_message.remove(m);
 		for (Map.Entry<Class<? extends Message>,Vector<MicroService>> pair : message_service.entrySet()){
 			for (int i = 0; i < pair.getValue().size(); i++) {
-				System.out.println("MessageBus 105");
 				pair.getValue().remove(m);
 			}
 		}
 
 	}
 
+
 	@Override
 	public synchronized Message awaitMessage(MicroService m) throws InterruptedException {
-		while(service_message.get(m).isEmpty())
-			wait();
+		while(service_message.get(m).isEmpty()) {
+			wait(1000);
+			Thread.interrupted();
+		}
 		Vector<Message> tempService = service_message.get(m);
 		Message output=tempService.firstElement();
 		service_message.get(m).remove(output);
 		return output;
+
 	}
 
 

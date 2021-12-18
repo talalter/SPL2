@@ -14,7 +14,6 @@ public class Model {
     public enum Result {None,Good,Bad}
     private String name;
     private Data data;
-    Student student;
     Status status;
     Result result;
     public void setResult(Result result) {
@@ -31,10 +30,6 @@ public class Model {
         return data;
     }
 
-    public Student getStudent() {
-        return student;
-    }
-
     public Status getStatus() {
         return status;
     }
@@ -43,15 +38,11 @@ public class Model {
         return result;
     }
 
-    public Model(String name, Data data, Student student){
+    public Model(String name, Data data){
         this.name=name;
         this.data = data;
-        this.student=student;
         this.status = Status.PreTrained;
         this.result=Result.None;
-    }
-    public Model(Student student){
-        this.student=student;
     }
 
     public void setStatus(Status status) {

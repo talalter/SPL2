@@ -17,6 +17,15 @@ public class Student {
     private String department;
     private Degree status;
     private int publications;
+
+    public void upgradePublications() {
+        this.publications++;
+    }
+
+    public void setPapersRead(int papersRead) {
+        this.papersRead = papersRead;
+    }
+
     private int papersRead;
     private Vector<Model> models;
 
@@ -26,10 +35,21 @@ public class Student {
     public Degree getStatus(){
         return this.status;
     }
-    public Student(String name, String department, Degree status, Vector<Model> models){
+
+    public void upgradePapersRead(){
+        this.papersRead++;
+    }
+    public Student(String name, String department, String status, Vector<Model> models){
         this.name=name;
         this.department = department;
-        this.status = status;
+        switch (status){
+            case "MSc":{
+                this.status=Degree.MSc;
+            }
+            case "PhD":{
+                this.status=Degree.PhD;
+            }
+        }
         this.publications = 0;
         this.papersRead = 0;
         this.models=models;

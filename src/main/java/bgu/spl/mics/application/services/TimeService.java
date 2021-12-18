@@ -1,11 +1,10 @@
 package bgu.spl.mics.application.services;
 
-import bgu.spl.mics.Broadcast;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.messages.FinishBroadcast;
+import org.w3c.dom.ls.LSOutput;
 
-import java.sql.Time;
-import java.time.Clock;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -21,40 +20,50 @@ import java.util.TimerTask;
 public class TimeService extends MicroService{
 	Timer timer;
 	TimerTask task;
-	int tickTime;
+	long tickTime;
 	long duration;
 	public TimeService(int tickTime, long duration) {
 		super("Timer");
 		this.duration = duration;
 		this.tickTime = tickTime;
-		timer = new Timer();
-		TimerTask task = null;
+
 
 	}
 	@Override
 	protected void initialize() {
+		subscribeBroadcast(FinishBroadcast.class, a -> {
+			Thread.currentThread().interrupt();
+			terminate();
+			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+Thread.currentThread().getName()+"!!!!!!!!!!!!!!!!!!!!");
+		});
+		timer = new Timer();
 		System.out.println(Thread.currentThread().getName());
-		System.out.println("microService line 37");
 		final long[] duration = {this.duration};
 		task = new TimerTask() {
-
 			@Override
 			public void run() {
 				if(duration[0] > 0){
-					sendBroadcast(new TickBroadcast());
-					System.out.println(Thread.currentThread().getName());
-					System.out.println("lalala");
-					duration[0]--;
+					if(!Thread.currentThread().isInterrupted()) {
+						sendBroadcast(new TickBroadcast());
+						System.out.println(Thread.currentThread().getName());
+						System.out.println("sendBroadcast");
+						duration[0]--;
+					}
 				}
 				else{
+					System.out.println("Finish");
+					task.cancel();
 					timer.cancel();
-					System.out.println("now start terminate");
+					timer.purge();
 					terminate();
+					sendBroadcast(new FinishBroadcast());
 					Thread.currentThread().interrupt();
-				}
-			}
 
+				}
+
+			}
 		};
+		System.out.println(Thread.currentThread().getName());
 		timer.scheduleAtFixedRate(task,0, this.tickTime*1000);
 	}
 
