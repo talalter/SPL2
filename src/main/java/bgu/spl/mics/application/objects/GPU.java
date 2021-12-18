@@ -28,8 +28,8 @@ public class GPU {
     private Vector<DataBatch> processedDataBatchVector; //that data is waiting to be prossessed
     private Vector<DataBatch> TrainedDataVector;
     //---------------------------CONSTRUCTORS-------------------------------------------
-    public GPU(String typeString, Model model, Cluster cluster){
-        this.cluster = cluster;
+    public GPU(String typeString, Model model){
+        this.cluster = Cluster.getInstance();
         switch (typeString){
             case "RTX3090":{
                 this.capacity = 32;
@@ -72,9 +72,6 @@ public class GPU {
 
     //TODO
     public void sendBatches(){
-
-        System.out.println("llllllllllllllllllllllllllllllllllll");
-
         Vector<DataBatch> temp=new Vector<DataBatch>();
         while(howmanytosend>0){
             if(unProcessedDataBatchVector.size()!=0)
@@ -84,8 +81,6 @@ public class GPU {
         cluster.recieveDBfromgpu(temp);
     }
     public void getBatchesFromCluster(){
-        System.out.println("llllllllllllllllllllllllllllllllllll");
-
         Vector<DataBatch> temp=cluster.withdrawDB(capacity-processedDataBatchVector.size(),this);
         for(int i=0;i<temp.size();i++){
             processedDataBatchVector.add(temp.get(i));
@@ -99,8 +94,6 @@ public class GPU {
         }
     }
     public void onTick(){
-        System.out.println("llllllllllllllllllllllllllllllllllll");
-
         getBatchesFromCluster();
         sendBatches();
         if(inprogressdata!=null){

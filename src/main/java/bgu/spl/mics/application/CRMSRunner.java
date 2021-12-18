@@ -2,8 +2,15 @@ package bgu.spl.mics.application;
 
 import bgu.spl.mics.application.objects.*;
 import bgu.spl.mics.application.services.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.Vector;
 
 /** This is the Main class of Compute Resources Management System application. You should parse the input file,
@@ -15,81 +22,131 @@ public class CRMSRunner {
     private static Data.Type Images;
 
     public static void main(String[] args) {
-        System.out.println(Thread.activeCount());
+
+        /*File input = new File("C:/Users/talal/Downloads/input.json");
+        try {
+            JsonElement fileElement = JsonParser.parseReader(new FileReader(input));
+            JsonObject fileObject = fileElement.getAsJsonObject();
+            JsonArray students = (JsonArray) fileObject.get("Students");
+            for (JsonElement student : students) {
+                Vector<Model> vectorModels = new Vector<Model>();
+                JsonObject studentObject = student.getAsJsonObject();
+                String nameStudent = studentObject.get("name").getAsString();
+                String department = studentObject.get("department").getAsString();
+                String status = studentObject.get("status").getAsString();
+                JsonArray models = (JsonArray) student.getAsJsonObject().get("models");
+                for (JsonElement model : models) {
+                    JsonObject modelObject = model.getAsJsonObject();
+                    String nameModel = modelObject.get("name").getAsString();
+                    String type = modelObject.get("type").getAsString();
+                    int size = modelObject.get("size").getAsInt();
+                    Data data = new Data(type, size);
+                    Model m = new Model(nameModel, data);
+                    vectorModels.add(m);
+                }
+                Student s = new Student(nameStudent, department, status, vectorModels);
+                Thread t = new Thread(new StudentService(s));
+                //t.start();
+
+            }
+            JsonArray GPUS = (JsonArray) fileObject.get("GPUS");
+            for (JsonElement gpu : GPUS) {
+                String name = gpu.getAsString();
+                //Thread t = new Thread(new GPUService(name));
+            }
+            JsonArray CPUS = (JsonArray) fileObject.get("CPUS");
+            for (JsonElement cpu : CPUS) {
+                int cores = cpu.getAsInt();
+                Thread t = new Thread(new CPUService(new CPU(cores)));
+                //t.start();
+            }
+            JsonArray conferences = (JsonArray) fileObject.get("Conferences");
+            for (JsonElement conference : conferences) {
+                JsonObject conferenceObject = conference.getAsJsonObject();
+                String nameConferences = conferenceObject.get("name").getAsString();
+                int date = conferenceObject.get("date").getAsInt();
+                Thread t = new Thread(new ConferenceService(new Conference(nameConferences, date)));
+                //t.start();
+
+            }
+            int tickTime = fileObject.get("TickTime").getAsInt();
+            long duration = fileObject.get("Duration").getAsLong();
+            Thread t = new Thread(new TimeService(tickTime, duration));
+            //t.start();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }*/
+
         Vector<Model> simbaModels = new Vector<Model>();
-        Data YOLO10DATA = new Data(Images,200000);
+        Data YOLO10DATA = new Data("Images", 200000);
         Model YOLO10 = new Model("YOLO10", YOLO10DATA);
-        Data ResNet9000Data = new Data(Images,200000);
+        Data ResNet9000Data = new Data("Images", 200000);
         Model ResNet9000 = new Model("ResNet9000", ResNet9000Data);
-        Data LessEfficientNetDATA = new Data(Images,20000);
+        Data LessEfficientNetDATA = new Data("Images", 20000);
         Model LessEfficientNet = new Model("YOLO10", LessEfficientNetDATA);
-        Data DensestNetData = new Data(Images,20000);
+        Data DensestNetData = new Data("Images", 20000);
         Model DensestNet = new Model("YOLO10", DensestNetData);
         simbaModels.add(YOLO10);
         simbaModels.add(ResNet9000);
         simbaModels.add(LessEfficientNet);
         simbaModels.add(DensestNet);
-        Student simba = new Student("Simba", "CS", Student.Degree.MSc, simbaModels);
+        Student simba = new Student("Simba", "CS", "Msc", simbaModels);
 
 
         Vector<Model> zazuModels = new Vector<Model>();
-        Data VITDATA = new Data(Images,100000000);
+        Data VITDATA = new Data("Images", 100000000);
         Model VIT = new Model("VIT", VITDATA);
         zazuModels.add(VIT);
-        Student zazu = new Student("Zazu", "EE", Student.Degree.PhD, zazuModels);
+        Student zazu = new Student("Zazu", "EE", "PhD", zazuModels);
 
 
         Vector<Model> pumbaModels = new Vector<Model>();
-        Data BertDATA = new Data(Data.Type.Text,1000000);
+        Data BertDATA = new Data("Text", 1000000);
         Model Bert = new Model("Bert", BertDATA);
-        Data GPT4Data = new Data(Data.Type.Text,1000000);
+        Data GPT4Data = new Data("Text", 1000000);
         Model GPT4 = new Model("GPT4", GPT4Data);
-        Data GPT5DATA = new Data(Data.Type.Text,200000);
+        Data GPT5DATA = new Data("Text", 200000);
         Model GPT5 = new Model("GPT5", GPT5DATA);
-        Data GPT10Data = new Data(Data.Type.Text,50000);
+        Data GPT10Data = new Data("Text", 50000);
         Model GPT10 = new Model("GPT10", GPT10Data);
         pumbaModels.add(Bert);
         pumbaModels.add(GPT4);
         pumbaModels.add(GPT5);
         pumbaModels.add(GPT10);
-        Student pumba = new Student("Pumba", "CS", Student.Degree.PhD, pumbaModels);
+        Student pumba = new Student("Pumba", "CS", "Phd", pumbaModels);
 
         Vector<Model> timonModels = new Vector<Model>();
-        Data PercepetronDATA = new Data(Data.Type.Tabular,1000000);
+        Data PercepetronDATA = new Data("Tabular", 1000000);
         Model Percepetron = new Model("Percepetron", PercepetronDATA);
-        Data GNNData = new Data(Data.Type.Tabular,1000000);
+        Data GNNData = new Data("Tabular", 1000000);
         Model GNN = new Model("GNN", GNNData);
-        Data MoreStyleGANDATA = new Data(Data.Type.Images,100000);
+        Data MoreStyleGANDATA = new Data("Images", 100000);
         Model MoreStyleGAN = new Model("MoreStyleGAN", MoreStyleGANDATA);
-        Data ConditionalGANData = new Data(Data.Type.Images,500000);
+        Data ConditionalGANData = new Data("Images", 500000);
         Model ConditionalGAN = new Model("ConditionalGAN", ConditionalGANData);
         timonModels.add(Percepetron);
         timonModels.add(GNN);
         timonModels.add(MoreStyleGAN);
         timonModels.add(ConditionalGAN);
-        Student timon = new Student("Timon", "SE", Student.Degree.MSc,timonModels);
+        Student timon = new Student("Timon", "SE","Msc", timonModels);
 
         Cluster c = Cluster.getInstance();
 
-        /*GPU g1 = new GPU ("RTX3090",c);
-        GPU g2 = new GPU ("RTX3090",c);
-        GPU g3 = new GPU ("RTX2080",c);
-        GPU g4 = new GPU ("GTX1080",c);
-*/
-        CPU c1 = new CPU(32,c);
-        CPU c2 = new CPU(32,c);
-        CPU c3 = new CPU(32,c);
-        CPU c4 = new CPU(16,c);
-        CPU c5 = new CPU(16,c);
-        CPU c6 = new CPU(16,c);
-        CPU c7 = new CPU(16,c);
+        CPU c1 = new CPU(32);
+        CPU c2 = new CPU(32);
+        CPU c3 = new CPU(32);
+        CPU c4 = new CPU(16);
+        CPU c5 = new CPU(16);
+        CPU c6 = new CPU(16);
+        CPU c7 = new CPU(16);
 
-        Conference conf1 = new Conference("ICML",20000);
-        Conference conf2 = new Conference("NeurIPS",25000);
-        Conference conf3 = new Conference("CVPR",30000);
-        Conference conf4 = new Conference("ECCV",40000);
-        Conference conf5 = new Conference("AISTATS",50000);
-        Thread threadTimeService = new Thread (new TimeService(1,3));
+        Conference conf1 = new Conference("ICML", 20000);
+        Conference conf2 = new Conference("NeurIPS", 25000);
+        Conference conf3 = new Conference("CVPR", 30000);
+        Conference conf4 = new Conference("ECCV", 40000);
+        Conference conf5 = new Conference("AISTATS", 50000);
+        Thread threadTimeService = new Thread(new TimeService(1, 3));
 
         Thread gpuThread1 = new Thread(new GPUService("RTX3090"));
         Thread gpuThread2 = new Thread(new GPUService("RTX3090"));
@@ -114,7 +171,6 @@ public class CRMSRunner {
         Thread studentThread2 = new Thread(new StudentService(zazu));
         Thread studentThread3 = new Thread(new StudentService(pumba));
         Thread studentThread4 = new Thread(new StudentService(timon));
-
 
 
         gpuThread1.start();  //1
@@ -163,6 +219,6 @@ public class CRMSRunner {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
     }
 }
+

@@ -39,10 +39,17 @@ public class Student {
     public void upgradePapersRead(){
         this.papersRead++;
     }
-    public Student(String name, String department, Degree status, Vector<Model> models){
+    public Student(String name, String department, String status, Vector<Model> models){
         this.name=name;
         this.department = department;
-        this.status = status;
+        switch (status){
+            case "MSc":{
+                this.status=Degree.MSc;
+            }
+            case "PhD":{
+                this.status=Degree.PhD;
+            }
+        }
         this.publications = 0;
         this.papersRead = 0;
         this.models=models;

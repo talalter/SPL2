@@ -22,9 +22,9 @@ public class CPU{
     private DataBatch currentDB;
 
 
-    public CPU(int cores, Cluster cluster){
+    public CPU(int cores){
         this.cores = cores;
-        this.cluster = cluster;
+        this.cluster = Cluster.getInstance();
         this.dataCurrentlyProccesing = new Vector<DataBatch>();
         this.tick=0;
         this.currentDB=null;
@@ -32,7 +32,6 @@ public class CPU{
     }
 
     public int ProcessData(DataBatch dataToProcess){
-        System.out.println("dddddddddddddddddddddddddddddddddddd");
         int timeToProcess=0;
         switch (dataToProcess.getData().getType()) {
             case Images:
@@ -47,8 +46,6 @@ public class CPU{
     }
 
     public void onTick(){
-        System.out.println("llllllllllllllllllllllllllllllllllll");
-
         Vector<DataBatch> temp=cluster.withdrawDB(this);
         if(temp!=null) {
             for (DataBatch DB : temp) {
@@ -74,9 +71,7 @@ public class CPU{
                 }
             }
         }
-
     }
-
     public int getTick() {
         return tick;
     }

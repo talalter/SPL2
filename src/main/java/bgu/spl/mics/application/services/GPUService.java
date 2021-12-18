@@ -60,7 +60,7 @@ public class GPUService extends MicroService {
             messegequeue.add(ev);
         else {
             complete(ev,Model.Status.Training);
-            gpu = new GPU(typestr, ev.getModel(), cluster);
+            gpu = new GPU(typestr, ev.getModel());
             complete(ev,Model.Status.Trained);
         }
     }
