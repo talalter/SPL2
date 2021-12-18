@@ -33,7 +33,7 @@ public class ConferenceService extends MicroService {
         subscribeBroadcast(FinishBroadcast.class, a -> {
             terminate();
             Thread.currentThread().interrupt();
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+Thread.currentThread().getName()+"!!!!!!!!!!!!!!!!!!!!");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+"Thread conference finish"+"!!!!!!!!!!!!!!!!!!!!");
         });
 
         subscribeEvent(PublishResultsEvent.class, (PublishResultsEvent pre) -> {

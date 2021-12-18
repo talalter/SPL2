@@ -74,9 +74,10 @@ public class GPU {
     public void sendBatches(){
         Vector<DataBatch> temp=new Vector<DataBatch>();
         while(howmanytosend>0){
-            if(unProcessedDataBatchVector.size()!=0)
+            if(unProcessedDataBatchVector.size()!=0){
+                howmanytosend--;
                 temp.add(unProcessedDataBatchVector.remove(0));
-            howmanytosend--;
+            }
         }
         cluster.recieveDBfromgpu(temp);
     }

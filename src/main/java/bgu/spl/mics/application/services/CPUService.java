@@ -24,7 +24,7 @@ public class CPUService extends MicroService {
         subscribeBroadcast(FinishBroadcast.class, a -> {
             Thread.currentThread().interrupt();
             terminate();
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+Thread.currentThread().getName()+"!!!!!!!!!!!!!!!!!!!!");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+"Thread cpu finish"+"!!!!!!!!!!!!!!!!!!!!");
         });
     }
     public void setTick(){

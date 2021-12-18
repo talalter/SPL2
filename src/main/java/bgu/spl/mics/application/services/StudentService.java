@@ -5,6 +5,7 @@ import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.*;
 import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.objects.Student;
+import com.sun.javaws.IconUtil;
 
 import java.util.Vector;
 
@@ -42,7 +43,7 @@ public class StudentService extends MicroService {
         subscribeBroadcast(FinishBroadcast.class, a -> {
             Thread.currentThread().interrupt();
             terminate();
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+Thread.currentThread().getName()+"!!!!!!!!!!!!!!!!!!!!");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+"Thread Student Finish"+"!!!!!!!!!!!!!!!!!!!!");
         });
 
         subscribeBroadcast(PublishConferenceBroadcast.class, (PublishConferenceBroadcast pcb) -> {
@@ -57,14 +58,18 @@ public class StudentService extends MicroService {
             TrainModelEvent trainModelEvent = new TrainModelEvent(m);
             TestModelEvent testModelEvent = new TestModelEvent(this.student.getStatus(),m);
             Future<Model.Status> futureTrain = sendEvent(trainModelEvent);
-            complete(trainModelEvent,Model.Status.Trained);
+            //complete(trainModelEvent,Model.Status.Trained);
+            System.out.println("Before train           "+Thread.currentThread().getName()+ "   "+ m.getName());
             if(futureTrain.get()==Model.Status.Trained){
+                System.out.println("After train");
                 Future<Model.Result> futureTest = sendEvent(testModelEvent);
-                complete(testModelEvent, Model.Result.Good);
+                //complete(testModelEvent, Model.Result.Good);
                 if(futureTest.get()==Model.Result.Good){
+                    System.out.println("Student 65 "+ Thread.currentThread().getName());
                     this.student.upgradePublications();
                     sendEvent(new PublishResultsEvent(m));
                 }
+                System.out.println("Model is good");
             }
         }
     }

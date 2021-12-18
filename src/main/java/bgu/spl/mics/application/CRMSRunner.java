@@ -2,10 +2,10 @@ package bgu.spl.mics.application;
 
 import bgu.spl.mics.application.objects.*;
 import bgu.spl.mics.application.services.*;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+//import com.google.gson.JsonArray;
+//import com.google.gson.JsonElement;
+//import com.google.gson.JsonObject;
+//import com.google.gson.JsonParser;
 
 
 import java.io.File;
@@ -79,13 +79,13 @@ public class CRMSRunner {
     }*/
 
         Vector<Model> simbaModels = new Vector<Model>();
-        Data YOLO10DATA = new Data("Images", 200000);
+        Data YOLO10DATA = new Data("Images", 8000);
         Model YOLO10 = new Model("YOLO10", YOLO10DATA);
-        Data ResNet9000Data = new Data("Images", 200000);
+        Data ResNet9000Data = new Data("Images", 8000);
         Model ResNet9000 = new Model("ResNet9000", ResNet9000Data);
-        Data LessEfficientNetDATA = new Data("Images", 20000);
+        Data LessEfficientNetDATA = new Data("Images", 11000);
         Model LessEfficientNet = new Model("YOLO10", LessEfficientNetDATA);
-        Data DensestNetData = new Data("Images", 20000);
+        Data DensestNetData = new Data("Images", 12000);
         Model DensestNet = new Model("YOLO10", DensestNetData);
         simbaModels.add(YOLO10);
         simbaModels.add(ResNet9000);
@@ -140,13 +140,20 @@ public class CRMSRunner {
         CPU c5 = new CPU(16);
         CPU c6 = new CPU(16);
         CPU c7 = new CPU(16);
+        c.addCPU(c1);
+        c.addCPU(c2);
+        c.addCPU(c3);
+        c.addCPU(c4);
+        c.addCPU(c5);
+        c.addCPU(c6);
+        c.addCPU(c7);
 
         Conference conf1 = new Conference("ICML", 20000);
         Conference conf2 = new Conference("NeurIPS", 25000);
         Conference conf3 = new Conference("CVPR", 30000);
         Conference conf4 = new Conference("ECCV", 40000);
         Conference conf5 = new Conference("AISTATS", 50000);
-        Thread threadTimeService = new Thread(new TimeService(1, 3));
+        Thread threadTimeService = new Thread(new TimeService(1, 25));
 
         Thread gpuThread1 = new Thread(new GPUService("RTX3090"));
         Thread gpuThread2 = new Thread(new GPUService("RTX3090"));

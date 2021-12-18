@@ -43,7 +43,7 @@ public class GPUService extends MicroService {
         subscribeBroadcast(FinishBroadcast.class, a -> {
             Thread.currentThread().interrupt();
             terminate();
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!" + Thread.currentThread().getName() + "!!!!!!!!!!!!!!!!!!!!");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!" + "Thread gpu finish" + "!!!!!!!!!!!!!!!!!!!!");
         });
     }
 
@@ -71,8 +71,8 @@ public class GPUService extends MicroService {
         else {
             gpu = new GPU();
             gpu.startProcessingTestEvent(ev);
-            Model.Result res = gpu.getModel().getResult();
-            complete(ev,res);
+            System.out.println("GPU 74 not coming here");
+            complete(ev,ev.getModel().getResult());
         }
     }
     private void setTick() {
@@ -85,9 +85,7 @@ public class GPUService extends MicroService {
                     handleEvent((TestModelEvent) messegequeue.remove(0));
             }
         }
-        if(gpu!=null && gpu.isInprocces()) {
-            System.out.println("ccccccccccccccccccccccc");
-
+        else if(gpu!=null ) {
             tick++;
             gpu.onTick();
         }
