@@ -51,11 +51,9 @@ public class CPU{
             for (DataBatch DB : temp) {
                 dataCurrentlyProccesing.add(DB);
             }
-
         }
-        tick++;
         if (currentDB != null) {
-            timeforcurrentDB--;
+            tick++;
             if (timeforcurrentDB == 0) {
                 cluster.recieveDBfromcpu(currentDB, this);
                 if (dataCurrentlyProccesing.size() != 0) {
@@ -65,6 +63,8 @@ public class CPU{
                     currentDB=null;
                 }
             }
+            if(currentDB!=null)
+                timeforcurrentDB--;
         } else {
             if (dataCurrentlyProccesing.size() != 0) {
                 currentDB = dataCurrentlyProccesing.remove(0);
@@ -74,6 +74,11 @@ public class CPU{
                 currentDB = null;
         }
     }
+
+    public Vector<DataBatch> getDataCurrentlyProccesing() {
+        return dataCurrentlyProccesing;
+    }
+
     public int getTick() {
         return tick;
     }

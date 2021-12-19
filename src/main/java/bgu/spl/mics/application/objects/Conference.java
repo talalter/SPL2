@@ -27,4 +27,12 @@ public class Conference {
     public Vector<Model> getModels(){
         return this.goodModels;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public Vector<Model> getGoodModels() {
+        return goodModels;
+    }
 }

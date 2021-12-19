@@ -79,7 +79,6 @@ public class GPU {
             }
             howmanytosend--;
         }
-        System.out.println(temp.size()+"                 gpu 83              "+Thread.currentThread().getName());
         cluster.recieveDBfromgpu(temp);
     }
     public void getBatchesFromCluster(){
@@ -91,27 +90,25 @@ public class GPU {
         }
         if(inprogressdata==null &processedDataBatchVector.size()!=0) {
             inprogressdata = processedDataBatchVector.remove(0);
-            ticksforCurrentDataBatch=tickstoTrain;
+            //ticksforCurrentDataBatch=tickstoTrain;
+            ticksforCurrentDataBatch=0;
             inprocces=true;
         }
     }
     public void onTick(){
-        System.out.println();
         getBatchesFromCluster();
         sendBatches();
-        System.out.println("numOfBatches: "+numofBatches+"          TrainedDataVector.size(): "+TrainedDataVector.size());
         if(inprogressdata!=null){
-            ticksforCurrentDataBatch--;
+            if(ticksforCurrentDataBatch>0)
+                ticksforCurrentDataBatch--;
             if(ticksforCurrentDataBatch==0){
                 TrainedDataVector.add(inprogressdata);
                 if(!processedDataBatchVector.isEmpty()){
                     inprogressdata=processedDataBatchVector.remove(0);
                     ticksforCurrentDataBatch=tickstoTrain;
                 }else{
-                    inprocces=false;//only training data is count as gpu process
                     if(TrainedDataVector.size()==numofBatches){
                         model.setStatus(Model.Status.Trained);
-                        System.out.println("GPU                           112");
                         isFinished=true;
                     }
                 }

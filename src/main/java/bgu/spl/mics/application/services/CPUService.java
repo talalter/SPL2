@@ -4,6 +4,7 @@ import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.FinishBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.objects.CPU;
+import bgu.spl.mics.application.objects.Cluster;
 
 /**
  * This class may not hold references for objects which it is not responsible for.
@@ -20,7 +21,10 @@ public class CPUService extends MicroService {
 
     @Override
     protected void initialize() {
-        subscribeBroadcast(TickBroadcast.class , (TickBroadcast e) -> {setTick();});
+        subscribeBroadcast(TickBroadcast.class , (TickBroadcast e) -> {setTick();
+            System.out.println("TOTAL CPU    "+ Cluster.getInstance().getTotalFromCPU()+"          "+Thread.currentThread().getName());
+           System.out.println("TOTAL GPU    "+ Cluster.getInstance().getTotalFromGPU()+"          "+Thread.currentThread().getName());
+            });
         subscribeBroadcast(FinishBroadcast.class, a -> {
             Thread.currentThread().interrupt();
             terminate();

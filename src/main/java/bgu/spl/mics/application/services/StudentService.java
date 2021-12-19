@@ -38,14 +38,44 @@ public class StudentService extends MicroService {
         this.student = student;
     }
 
+    private void printModels(){
+        for (Model model :modelsToPublish){
+            System.out.println(model.getName());
+        }
+    }
+    private void onTick(){
+        if(student.getModels()!=null&&student.getModels().size()>0) {
+            Model m = student.getModels().firstElement();
+            if (m.getStatus() == Model.Status.Trained) {
+                System.out.println("sssssssssssssssssssss                   49");
+                TestModelEvent testModelEvent = new TestModelEvent(this.student.getStatus(), m);
+                Future<Model.Result> futureTest = sendEvent(testModelEvent);
+                if (testModelEvent.getModel().getResult() == Model.Result.Good) {
+                    System.out.println("sssssssssssssssssssss                   53");
+                    modelsToPublish.add(m);
+                    this.student.upgradePublications();
+                    sendEvent(new PublishResultsEvent(m));
+                }
+                student.getModels().remove(0);
+                if(student.getModels().size()>0)
+                     sendEvent(new TrainModelEvent(student.getModels().firstElement()));
+                System.out.println("sssssssssssssssssssss                   60");
+
+            }
+        }
+    }
+
     @Override
-    protected void initialize() {
+    protected synchronized void initialize() {
+        Model m=student.getModels().firstElement();
+        TrainModelEvent trainModelEvent = new TrainModelEvent(m);
+        sendEvent(trainModelEvent);
         subscribeBroadcast(FinishBroadcast.class, a -> {
             Thread.currentThread().interrupt();
             terminate();
             System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!" + "Thread student finish" + "!!!!!!!!!!!!!!!!!!!");
+            printModels();
         });
-
         subscribeBroadcast(PublishConferenceBroadcast.class, (PublishConferenceBroadcast pcb) -> {
             pcb.getConference().getModels().firstElement();
         });
@@ -53,31 +83,6 @@ public class StudentService extends MicroService {
 
             return;
         }
-
-        for (Model m : student.getModels()) {
-            TrainModelEvent trainModelEvent = new TrainModelEvent(m);
-            TestModelEvent testModelEvent = new TestModelEvent(this.student.getStatus(), m);
-            Future<Model.Status> futureTrain = sendEvent(trainModelEvent);
-            System.out.println("before train     " + m.getName() + "        " + Thread.currentThread().getName());
-            //complete(trainModelEvent,Model.Status.Trained);
-            while (futureTrain.get() != Model.Status.Trained) {
-                try {
-                    System.out.println("waiting ss 64");
-                    wait(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            //if(m.getStatus()==Model.Status.Trained) {
-            System.out.println("after train     " + m.getName() + "        " + Thread.currentThread().getName());
-            Future<Model.Result> futureTest = sendEvent(testModelEvent);
-            //complete(testModelEvent, Model.Result.Good);
-            if (futureTest.get() == Model.Result.Good) {
-                //if (m.getResult() == Model.Result.Good) {
-                this.student.upgradePublications();
-                sendEvent(new PublishResultsEvent(m));
-            }
-            System.out.println("after test     " + m.getName() + "        " + Thread.currentThread().getName());
-        }
+        subscribeBroadcast(TickBroadcast.class,a -> onTick());
     }
 }

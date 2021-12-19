@@ -29,6 +29,22 @@ public class Student {
     private int papersRead;
     private Vector<Model> models;
 
+    public String getName() {
+        return name;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public int getPublications() {
+        return publications;
+    }
+
+    public int getPapersRead() {
+        return papersRead;
+    }
+
     public Vector<Model> getModels() {
         return models;
     }

@@ -25,14 +25,17 @@ public class GPUService extends MicroService {
     private Vector<Event> messegequeue;
     int tick = 0;
     private GPU gpu;
+    private int numberofModelsTrained;
     TrainModelEvent modelEvent;
     private boolean isprocess;
     private String typestr;
+    private String currenttype;
 
     public GPUService(String type) {
         super("GPU");
         this.typestr = type;
         this.messegequeue = new Vector<Event>();
+        this.numberofModelsTrained=0;
     }
 
     @Override
@@ -42,8 +45,10 @@ public class GPUService extends MicroService {
         subscribeEvent(TestModelEvent.class, (TestModelEvent event) -> handleEvent(event));
         subscribeBroadcast(FinishBroadcast.class, a -> {
             Thread.currentThread().interrupt();
-            terminate();
             System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!" + "Thread gpu finish" + "!!!!!!!!!!!!!!!!!!!!");
+            System.out.println("number of models trained by "+Thread.currentThread().getId()+"    "+numberofModelsTrained);
+            terminate();
+
         });
     }
 
@@ -57,35 +62,40 @@ public class GPUService extends MicroService {
      */
     public void handleEvent(TrainModelEvent ev) {
 
-        if (gpu != null && gpu.isInprocces())
+        if (gpu != null )
             messegequeue.add(ev);
         else {
-            complete(ev,Model.Status.Training);
+            ev.getModel().setStatus(Model.Status.Training);
             gpu = new GPU(typestr, ev.getModel());
             this.modelEvent = ev;
         }
     }
 
     public void handleEvent(TestModelEvent ev) {
-        if (gpu != null && gpu.isInprocces())
+        if (gpu != null )
             messegequeue.add(ev);
         else {
             gpu = new GPU();
             gpu.startProcessingTestEvent(ev);
-            System.out.println("GPU 74 not coming here");
             complete(ev,ev.getModel().getResult());
         }
     }
     private void setTick() {
         if(gpu!=null && gpu.isFinished()) {
+            numberofModelsTrained++;
             complete(modelEvent, Model.Status.Trained);
+            modelEvent.getModel().setStatus(Model.Status.Trained);
+            System.out.println("type of model "+modelEvent.getClass()+"  name of model that finished   "+modelEvent.getModel().getName()+"   total of models trained   "+numberofModelsTrained+"    by thred num  "+Thread.currentThread().getId());
+            gpu=null;
             if (!messegequeue.isEmpty()) {
                 if (messegequeue.get(0).getClass() == TrainModelEvent.class){
                     this.modelEvent = (TrainModelEvent)messegequeue.remove(0);
                     handleEvent( modelEvent);
                 }
-                else
+                else {
+                    System.out.println("test model  "+messegequeue.firstElement().getClass());
                     handleEvent((TestModelEvent) messegequeue.remove(0));
+                }
             }
         }
         else if(gpu!=null ) {
