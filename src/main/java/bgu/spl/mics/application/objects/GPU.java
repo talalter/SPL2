@@ -18,6 +18,43 @@ public class GPU {
     private int ticksforCurrentDataBatch;
     private int howmanytosend;//this is the number of db i can get back
     private boolean inprocces;
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public int getTickstoTrain() {
+        return tickstoTrain;
+    }
+
+    public int getNumofBatches() {
+        return numofBatches;
+    }
+
+    public int getTicksforCurrentDataBatch() {
+        return ticksforCurrentDataBatch;
+    }
+
+    public int getHowmanytosend() {
+        return howmanytosend;
+    }
+
+    public Cluster getCluster() {
+        return cluster;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public DataBatch getInprogressdata() {
+        return inprogressdata;
+    }
+
+    public int getDatabackfromclustcounter() {
+        return databackfromclustcounter;
+    }
+
     private boolean isFinished;
     private Model model;
     private Cluster cluster;
@@ -90,8 +127,7 @@ public class GPU {
         }
         if(inprogressdata==null &processedDataBatchVector.size()!=0) {
             inprogressdata = processedDataBatchVector.remove(0);
-            //ticksforCurrentDataBatch=tickstoTrain;
-            ticksforCurrentDataBatch=0;
+            ticksforCurrentDataBatch=tickstoTrain;
             inprocces=true;
         }
     }

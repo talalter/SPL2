@@ -1,12 +1,13 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.messages.FinishBroadcast;
-import org.w3c.dom.ls.LSOutput;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.objects.Cluster;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * TimeService is the global system timer There is only one instance of this micro-service.
@@ -18,54 +19,43 @@ import java.util.TimerTask;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class TimeService extends MicroService{
-	Timer timer;
-	TimerTask task;
-	long tickTime;
-	long duration;
-	public TimeService(int tickTime, long duration) {
-		super("Timer");
+	private long speed;
+	private int duration;
+	private int tickCount;
+	private MessageBusImpl msgBus;
+	public TimeService(int speed,int duration){
+		super("Time-Service");
+		this.speed = TimeUnit.MILLISECONDS.toMillis(speed);;
+		this.tickCount = 0;
 		this.duration = duration;
-		this.tickTime = tickTime;
-
-
+		msgBus = MessageBusImpl.getInstance();
 	}
+	public void tick(){
+		tickCount++;
+	}
+
 	@Override
 	protected void initialize() {
-		subscribeBroadcast(FinishBroadcast.class, a -> {
-			Thread.currentThread().interrupt();
-			terminate();
-			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+"Thread time finish"+"!!!!!!!!!!!!!!!!!!!!");
-		});
-		timer = new Timer();
-		System.out.println(Thread.currentThread().getName());
-		final long[] duration = {this.duration};
-		task = new TimerTask() {
-			@Override
-			public void run() {
-				if(duration[0] > 0){
-					if(!Thread.currentThread().isInterrupted()) {
-						sendBroadcast(new TickBroadcast());
-						System.out.println(Thread.currentThread().getName());
-						System.out.println("sendBroadcast");
-						duration[0]--;
-					}
-				}
-				else{
-					System.out.println("Finish");
-					task.cancel();
-					timer.cancel();
-					timer.purge();
-					terminate();
-					sendBroadcast(new FinishBroadcast());
-					Thread.currentThread().interrupt();
+		while(duration>=tickCount){
+			sendBroadcast(new TickBroadcast());
 
-				}
-
+			try{
+				tick();
+				Thread.sleep(speed);
 			}
-		};
-		System.out.println(Thread.currentThread().getName());
-		timer.scheduleAtFixedRate(task,0, this.tickTime*1000);
-	}
+			catch (InterruptedException e){
+				System.out.println(e.getMessage());
+			}
+		}
+		subscribeBroadcast(FinishBroadcast.class,(shut)->{
+			System.out.println("TOTAL GPUS: "+ Cluster.getInstance().getTotalFromGPU());
+			System.out.println("TOTAL CPUS: "+ Cluster.getInstance().getTotalFromCPU());
+			terminate();
 
+		});
+		System.out.println("TimeService Finished");
+		sendBroadcast(new FinishBroadcast());
+
+	}
 
 }

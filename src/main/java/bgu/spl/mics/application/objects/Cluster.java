@@ -41,11 +41,11 @@ public class Cluster {
 
 	public void recieveDBfromgpu(Vector<DataBatch> vec) {
 //		synchronized (lockCPUSDB) {
-			if(vec!=null) {
+			if(vec!=null ) {
 				totalFromGPU+=vec.size();
 				CPU cpu = cpus.remove(0);
 				for (DataBatch db : vec) {
-					if (cpu != null) {
+					if (cpu != null&&db!=null) {
 						CPUSDB.get(cpu).add(db);
 						CPUSDBforcomperator.get(cpu).add(db);
 					}
@@ -84,9 +84,9 @@ public class Cluster {
 
 	public  void recieveDBfromcpu(DataBatch db, CPU cpu) {
 		totalFromCPU++;
-		if(ProcessDB.containsKey(db.getGpu()))
+		if(db!=null&&ProcessDB.containsKey(db.getGpu()))
 			ProcessDB.get(db.getGpu()).add(db);
-		else {
+		else if(db!=null) {
 			ProcessDB.put(db.getGpu(), new Vector<DataBatch>());
 			ProcessDB.get(db.getGpu()).add(db);
 		}

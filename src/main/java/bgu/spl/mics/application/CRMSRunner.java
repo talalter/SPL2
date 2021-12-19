@@ -70,7 +70,7 @@ public class CRMSRunner {
             }
             int tickTime = fileObject.get("TickTime").getAsInt();
             long duration = fileObject.get("Duration").getAsLong();
-            threads.add(new Thread(new TimeService(1, duration/1000)));
+            threads.add(new Thread(new TimeService(1, 55000)));
 
             for (Thread thread : threads){
                 thread.start();

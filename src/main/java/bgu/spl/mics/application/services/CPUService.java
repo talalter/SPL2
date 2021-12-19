@@ -24,6 +24,7 @@ public class CPUService extends MicroService {
         subscribeBroadcast(TickBroadcast.class , (TickBroadcast e) -> {setTick();
             System.out.println("TOTAL CPU    "+ Cluster.getInstance().getTotalFromCPU()+"          "+Thread.currentThread().getName());
            System.out.println("TOTAL GPU    "+ Cluster.getInstance().getTotalFromGPU()+"          "+Thread.currentThread().getName());
+            System.out.println("thred id : "+Thread.currentThread().getId()+" num of db :"+cpu.getNumofBatchesProcessed());
             });
         subscribeBroadcast(FinishBroadcast.class, a -> {
             Thread.currentThread().interrupt();

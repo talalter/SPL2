@@ -12,6 +12,7 @@ import java.util.Vector;
  */
 public class CPU{
     private  int timeforcurrentDB;
+    private int numofBatchesProcessed;
     private int cores;
     public int getCores() {
         return cores;
@@ -29,6 +30,7 @@ public class CPU{
         this.tick=0;
         this.currentDB=null;
         this.timeforcurrentDB=0;
+        this.numofBatchesProcessed=0;
     }
 
     public int ProcessData(DataBatch dataToProcess){
@@ -55,6 +57,7 @@ public class CPU{
         if (currentDB != null) {
             tick++;
             if (timeforcurrentDB == 0) {
+                numofBatchesProcessed++;
                 cluster.recieveDBfromcpu(currentDB, this);
                 if (dataCurrentlyProccesing.size() != 0) {
                     currentDB = dataCurrentlyProccesing.remove(0);
@@ -77,6 +80,10 @@ public class CPU{
 
     public Vector<DataBatch> getDataCurrentlyProccesing() {
         return dataCurrentlyProccesing;
+    }
+
+    public int getNumofBatchesProcessed() {
+        return numofBatchesProcessed;
     }
 
     public int getTick() {
